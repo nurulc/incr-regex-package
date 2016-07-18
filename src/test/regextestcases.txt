@@ -1,0 +1,4 @@
+[a-f]+ ((to|be(ing)?|fail) )+123	nurul being be to fail 123	true	DONE
+[a-f]+ ((to|be(ing)*|fail) )+123	nurul being be beinging to fail 123	true	DONE
+((this|is|the|voice|of|reason|that|we|may|assume|final|solution) )+	this is the voice of reason that we may assume the final solution 	true	MAYBE
+((this|is|the|voice|of|reason|that|we|may|assume|final|solution) )+	this is the voice of reason that we may assume the final solution treason	false	FAIL
