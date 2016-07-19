@@ -71,7 +71,7 @@ describe("RXInputMask Basic", () => {
 // Example of use from the test cases
 //
     let rxi = new RXInputMask({pattern: /aa[a-zA-Z]+@@\d+!!/ });
-		it("1. pattern /aa[a-zA-Z]+@@\\d+!!/ 1", () =>{
+		it("1. pattern /aa[a-zA-Z]+@@\\d+!!/ - add 'aabcd' - expect aaaabcd", () =>{
  			expect(rxi !== undefined).to.be.true;
  			var r =  ins(rxi,"aabcd");
  			expect(rxi._getValue()).to.deep.equal("aaaabcd");
@@ -79,15 +79,15 @@ describe("RXInputMask Basic", () => {
  			
  			 			
  		});
- 		it("2. pattern /aa\[a-zA-Z]+@@\\d+!!/ ", () =>{
+ 		it("2. pattern /aa\[a-zA-Z]+@@\\d+!!/ - ins(aabcdeFG - expect(aaaabcdeFG)", () =>{
  			expect(rxi !== undefined).to.be.true;
  			rxi.reset();
- 			var r =  ins(rxi,"aabcdefg");
- 			expect(rxi._getValue()).to.deep.equal("aaaabcdefg");
+ 			var r =  ins(rxi,"aabcdeFG");
+ 			expect(rxi._getValue()).to.deep.equal("aaaabcdeFG");
  			expect(rxi.selection).to.deep.equal({start: 10, end: 10});
  			 			
  		});
- 		it("3. pattern /aa[a-zA-Z]+@@\\d+!!/ add 'aabcdefg' then add 'xyz' at pos 3", () =>{
+ 		it("3. pattern /aa[a-zA-Z]+@@\\d+!!/ add 'bcdefg' - (expect aabcdefg) then add 'xyz' at pos 3 expect(aabxyzcdefg)", () =>{
  			expect(rxi !== undefined).to.be.true;
  			rxi.reset();
  			ins(rxi,'bcdefg');
@@ -99,7 +99,7 @@ describe("RXInputMask Basic", () => {
  			 			
  		});
 
- 		it("4. pattern /aa[a-zA-Z]+@@\\d+!!/ add 'aabcdefg@@12' then add 'xyz' at pos 3", () =>{
+ 		it("4. pattern /aa[a-zA-Z]+@@\\d+!!/ add 'bcdefg@@12' expect'aabcdefg@@12' then add 'xyz' at pos 3", () =>{
  			expect(rxi !== undefined).to.be.true;
  			rxi.reset();
  			ins(rxi,'bcdefg@@12');
@@ -110,10 +110,10 @@ describe("RXInputMask Basic", () => {
  			expect(rxi.selection).to.deep.equal({start: 6, end: 6});
  			 			
  		});
- 		it("5. pattern /aa[a-zA-Z]+@@\\d+!!/ add 'aabcdefg@@12' then add 'xyz' at pos 3..6", () =>{
+ 		it("5. pattern /aa[a-zA-Z]+@@\\d+!!/ add 'bcdefg12' expect 'aabcdefg@@12' then add 'xyz' at pos 3..6", () =>{
  			expect(rxi !== undefined).to.be.true;
  			rxi.reset();
- 			ins(rxi,'bcdefg@@12');
+ 			ins(rxi,'bcdefg12');
  			expect(rxi._getValue()).to.deep.equal("aabcdefg@@12");
  			//rxi.select(3,6); //"cde"
  			rxi.selection.start = 3; rxi.selection.end = 6;
@@ -122,10 +122,11 @@ describe("RXInputMask Basic", () => {
  			expect(rxi.selection).to.deep.equal({start: 6, end: 6});
  			 			
  		});
- 		it("6. pattern /aa[a-zA-Z]+@\\d+!!/ add 'aabcdefg' then skipFixed expect 'aabcdefg@@'", () =>{
+ 		it("6. pattern /aa[a-zA-Z]+@\\d+!!/ add 'bcdefg' - expect 'aabcdefg' then skipFixed expect 'aabcdefg@@'", () =>{
  			expect(rxi !== undefined).to.be.true;
  			rxi.reset();
  			ins(rxi,'bcdefg');
+      expect(rxi._getValue()).to.deep.equal("aabcdefg");
  			rxi.skipFixed(false);
  			rxi.skipFixed(true);
  			expect(rxi._getValue()).to.deep.equal('aabcdefg@@');
@@ -138,7 +139,7 @@ describe("RXInputMask Basic", () => {
  			expect(rxi.selection).to.deep.equal({start: 12, end: 12});
  			 			
  		});
- 		it("8. pattern /aa[a-zA-Z]+@@\d+!!/ add 'aabcdefg@@12' then selsect pos 4,10 ('defg@@1') input 'xyz' one character at a time ", () =>{
+ 		it("8. pattern /aa[a-zA-Z]+@@\d+!!/ add 'bcdefg@@12!' expect('aabcdefg@@12!!') then selsect pos 4,10 ('defg@@1') input 'xyz' one character at a time ", () =>{
  			expect(rxi !== undefined).to.be.true;
  			rxi.reset();
  			ins(rxi,'bcdefg@@12!');
@@ -147,8 +148,8 @@ describe("RXInputMask Basic", () => {
       rxi.input('x');
       expect(rxi._getValue()).to.equal(convertMask("aabcx@@2!!"));
  			expect(rxi.selection).to.deep.equal({start: 5, end: 5});
-      console.log("Regex:", rxi.pattern.matcher," selection:",rxi.selection);
-      console.log("current:", rxi.pattern.matcher.current," selection:",rxi.selection);
+      //console.log("Regex:", rxi.pattern.matcher," selection:",rxi.selection);
+      //console.log("current:", rxi.pattern.matcher.current," selection:",rxi.selection);
       rxi.input('y');
       expect(rxi.selection).to.deep.equal({start: 6, end: 6});
       expect(rxi._getValue()).to.equal(convertMask("aabcxy@@2!!"));
