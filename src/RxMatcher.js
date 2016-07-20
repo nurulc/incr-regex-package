@@ -31,16 +31,17 @@ export class RxMatcher {
 	}
 
   getFirstEditableAtOrAfter(ix) {
-		i = ix;
+		let i = ix;
 		let tracker = this.getInputTracker();
 		for(;i < tracker.length; i++) 
-        if(tracker[i][1] === undefined) return i;
-		  		
+    //  if(isMeta(tracker[i][1])) return i;
+      if(tracker[i][1] === undefined) return i;
+
 		let m = this.minChars();
-		let i = tracker.length;
+		i = tracker.length;
 		let j = 0;
-		if( m.length > 0 && isOptional(m.charAt(j))) j++;
-		for(; j<m.length && (i <= ix || !isMeta(m.charAt(j))); j++,i++);
+		//if( m.length > 0 && isOptional(m.charAt(j))) j++;
+		for(; j<m.length && (i < ix || !isMeta(m.charAt(j))); j++,i++);
 		return i;    
   	}
 

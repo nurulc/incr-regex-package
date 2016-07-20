@@ -372,7 +372,7 @@ export class RXInputMask{
     return this;
    }
 
-   setSelection(selection) {
+/*   setSelection(selection) {
      let sel = selection===this.selection? this.selection:copy(selection);
      let old = this.selection || sel ;
 
@@ -394,33 +394,41 @@ export class RXInputMask{
          this.pattern.setPos(firstEditableIndex);
          return this;
        }
+
+       this.selection = sel;
        // check if we moved left 
        if( selection.start < old.start) { // moved left
           let ix = this.pattern.getFirstEditableAtOrBefore(sel.start);
           let msk = this.getValue();
           while( isOptional(msk.charAt(ix)) && ix > firstEditableIndex) ix--;
-          this.selection = sel;
-          this.selection.start = this.selection.end = ix;
+          this.selection = newSel(ix,ix);
+       //   this.selection.start = this.selection.end = ix;
           return this;   
        }
        else if( selection.start > old.start) {
           let ix = this.pattern.getFirstEditableAtOrAfter(sel.start);
           let msk = this.pattern.minChars();
           while( isOptional(msk.charAt(ix)) && ix < msk.length) ix++;
-          this.selection = sel;
-          this.selection.start = this.selection.end = ix;
+          this.selection = newSel(ix,ix);
           return this;
        }
      } else {
-      if (this.selection.start < firstEditableIndex) {
-         this.selection.start = firstEditableIndex;
-      } else if (this.selection.end > lastEditableIndex) {
-         this.selection.end = lastEditableIndex;
-      } else {
-
-      }
+        this.selection = clip(sel,range);
      }
      return this;
+   } */
+
+   setSelection(selection) {
+      if(!selection ) return this;
+      if( !this.selection ) this.selection = selection;
+      this.selection = this._adjustSelection(selection, selection.start >= this.selection.start);
+      return this;
+   }
+   _adjustSelection(sel,forward) {
+      if( zeroRange(sel)) {
+        return newSel(forward ? this.pattern.getFirstEditableAtOrAfter(sel.start) : this.pattern.getFirstEditableAtOrBefore(sel.start));
+      }
+      return newSel(this.pattern.getFirstEditableAtOrBefore(sel.start), this.pattern.getFirstEditableAtOrAfter(sel.end));
    }
 
    _setValueFrom(ix,str) {

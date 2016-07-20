@@ -396,6 +396,33 @@ describe("RXInputMask Basic", () => {
  			
  		});
     });
+
+    describe("Check MaskedInput complex regex", () =>{
+        let rxi = new RXInputMask({pattern: /\+\(\d{3}\)-\d{3}-\d{4}|#\d{3}\.\d{3}X?YZ| ?\d{3}---\d{4}\./ });
+        it("0. Fixed pattern /\\+\\(\\d{3}\\)-\\d{3}-\\d{4}|#\\d{3}\.\\d{3}X?YZ| ?\\d{3}---\\d{4}\\./", () =>{
+      expect(rxi !== undefined).to.be.true;
+      rxi.reset();
+      var r =  ins(rxi,"1");
+      expect(rxi.getValue()).to.equal(convertMask("1__---____."));
+      expect(rxi.pattern.minChars()).to.equal(convertMask("__---____."));
+      rxi.setSelection(SEL(1,1));
+      expect(rxi.selection).to.deep.equal({start: 1, end: 1});
+      rxi.setValue(convertMask("1__---____."));
+      expect(rxi.pattern.getFirstEditableAtOrAfter(0)).to.equal(0);
+      let start=rxi.selection.start, end=rxi.selection.end;
+      expect(start).to.equal(end);
+      expect(rxi.pattern.getFirstEditableAtOrBefore(start-1)).to.equal(0);
+            end = 1;
+      rxi.backspace();
+      rxi.reset();
+      ins(rxi,"+914725984");
+      expect(rxi.getValue()).to.equal(convertMask("+(914)-725-984_"));
+      rxi.setSelection(SEL(0,1));
+      expect(rxi.selection.end).to.equal(2);
+      expect(rxi.pattern.getFirstEditableAtOrAfter(rxi.selection.end)).to.equal(2);
+      
+    });
+    });
 });
 
 
