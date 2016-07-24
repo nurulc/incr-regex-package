@@ -27,7 +27,7 @@ export class RxMatcher {
 	constructor(matcher) {
 		this.matcher = matcher;
 		this._lastEditableIndex = undefined;
-		this._tracker;
+		//this._tracker;
 	}
 
   getFirstEditableAtOrAfter(ix) {
@@ -41,7 +41,8 @@ export class RxMatcher {
 		i = tracker.length;
 		let j = 0;
 		//if( m.length > 0 && isOptional(m.charAt(j))) j++;
-		for(; j<m.length && (i < ix || !isMeta(m.charAt(j))); j++,i++);
+		//for(; j<m.length && (i < ix || !isMeta(m.charAt(j))); j++,i++);
+    for(; j<m.length && !isMeta(m.charAt(j)); j++,i++);
 		return i;    
   	}
 
@@ -147,6 +148,7 @@ export class RxMatcher {
 
   reset() { /* public */
   	  this.matcher.reset();
+      this._resetCache();
       return this;
   }
 
@@ -157,8 +159,9 @@ export class RxMatcher {
 
   getInputTracker() {
     //if( this._tracker === undefined ) 
-    	this._tracker = this.matcher.tracker;//this.matcher.getInputTracker();  
-  	return this._tracker; 
+    //	this._tracker = this.matcher.tracker;//this.matcher.getInputTracker();  
+  	//return this._tracker; 
+    return this.matcher.tracker;
   }
 
 
@@ -169,7 +172,7 @@ export class RxMatcher {
   }
 
   _resetCache() {
-  	this._tracker = undefined;
+  	//this._tracker = undefined;
   	this._lastEditableIndex = undefined;
   }
 

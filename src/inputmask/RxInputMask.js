@@ -36,14 +36,19 @@ function has(object, key) {
 
 function newSel(s,e) { e = e || s; return {start: Math.min(s,e), end: Math.max(s,e)}; }
 function selPlus(sel, x,y) { return clip(newSel(sel.start+x,sel.end+(y==undefined?x:y))); }
-function clip(sel, range) { 
-  const clp = (x,r) => Math.max(Math.min(x,r.end),r.start);
-  return !range ? sel : { start: clp(sel.start, range), 
-                          end:   clp(sel.end,   range)};
+function clip(sel, range,clipFnAfter, clipFnBefore) { 
+  clipFnAfter = clipFnAfter || ((x) => x);
+  clipFnBefore = clipFnBefore || clipFnAfter;
+  const clp = (x,r, clipFn) => clipFn(Math.max(Math.min(x,r.end),r.start));
+  return !range ? sel : { start: clp(sel.start, range, clipFnBefore), 
+                          end:   clp(sel.end,   range, clipFnAfter)};
 }
 function zero(x) { return !(x||0) ; }
 function selRange(sel) { return sel?sel.end - sel.start:0; }
 function zeroRange(sel) { return zero(selRange(sel)); }
+function backward(oldSelV, newSelV) {
+  return (oldSelV.start > newSelV. start);
+}
 
 
 
@@ -148,7 +153,8 @@ export class RXInputMask{
          }
          selection = this._updateSelection(selection, newPattern.getInputLength());
          endPos = Math.max(endPos, selection.end);
-         let newPos = newPattern.getInputLength();
+         //let newPos = newPattern.getInputLength();
+         let newPos = newPattern.getFirstEditableAtOrAfter(newPattern.getInputLength());
          // Put back the remainder
          // 
 
@@ -234,6 +240,14 @@ export class RXInputMask{
     this._lastSelection = copy(this.selection)
 
     return true
+  }
+
+  del() {
+    if(zeroRange(this.selection)) {
+      this.right(this.selection);
+      return this.backspace();
+    }
+    else return this.backspace();
   }
 
   /**
@@ -357,7 +371,7 @@ export class RXInputMask{
      this.setValue(options.value)
      this.emptyValue = this.pattern.minChars();
      this.setSelection(options.selection);
-     while(this.skipFixed());
+     while(this.skipFixed(true));
      if( zeroRange(this.selection) && this.pattern.getInputTracker().length != 0 ) {
         var ss = this._getValue();
         this.setValue(ss);
@@ -372,36 +386,38 @@ export class RXInputMask{
     return this;
    }
 
-/*   setSelection(selection) {
+   setSelection(selection) {
      let sel = selection===this.selection? this.selection:copy(selection);
      let old = this.selection || sel ;
-
+     const fea = (x) => this.pattern.getFirstEditableAtOrAfter(x);
+     const feb = (x) => this.pattern.getFirstEditableAtOrBefore(x);
      this.selection = old;
-     let firstEditableIndex = this.pattern.getFirstEditableAtOrAfter(0);
+     let firstEditableIndex = fea(0); // first editable after
      let lastEditableIndex = this.pattern.lastEditableIndex();
      let range = newSel(firstEditableIndex,lastEditableIndex)
      if (zeroRange(sel)) {
-       sel = clip(sel,range);
-       if (sel.start < firstEditableIndex) {
+       this.selection = clip(sel,range,backward(this.selection, sel)?feb:fea);
+/*       if (sel.start < firstEditableIndex) {
          this.selection = sel;
          this.selection.start = this.selection.end = firstEditableIndex
-         this.pattern.setPos(firstEditableIndex);
+         //this.pattern.setPos(firstEditableIndex);
          return this;
        }
        if (sel.end > lastEditableIndex) {
          this.selection = sel;
          this.selection.start = this.selection.end = lastEditableIndex;
-         this.pattern.setPos(firstEditableIndex);
+         //this.pattern.setPos(lastEditableIndex);
          return this;
        }
 
-       this.selection = sel;
+       //this.selection = sel;
        // check if we moved left 
        if( selection.start < old.start) { // moved left
           let ix = this.pattern.getFirstEditableAtOrBefore(sel.start);
           let msk = this.getValue();
           while( isOptional(msk.charAt(ix)) && ix > firstEditableIndex) ix--;
           this.selection = newSel(ix,ix);
+          //this.pattern.setPos(ix);
        //   this.selection.start = this.selection.end = ix;
           return this;   
        }
@@ -410,20 +426,35 @@ export class RXInputMask{
           let msk = this.pattern.minChars();
           while( isOptional(msk.charAt(ix)) && ix < msk.length) ix++;
           this.selection = newSel(ix,ix);
+          //this.pattern.setPos(ix);
           return this;
-       }
+       } */
      } else {
-        this.selection = clip(sel,range);
+      this.selection = clip(sel,range,fea,feb);
+/*      if (this.selection.start < firstEditableIndex) {
+         this.selection.start = firstEditableIndex;
+      } 
+      if (this.selection.end < firstEditableIndex) {
+         this.selection.end = firstEditableIndex;
+      } 
+      if (this.selection.start > lastEditableIndex) {
+         this.selection.start = lastEditableIndex;
+      }
+      if (this.selection.end > lastEditableIndex) {
+         this.selection.end = lastEditableIndex;
+      }
+*/      
      }
      return this;
-   } */
-
+   }
+/*
    setSelection(selection) {
       if(!selection ) return this;
       if( !this.selection ) this.selection = selection;
       this.selection = this._adjustSelection(selection, selection.start >= this.selection.start);
       return this;
    }
+*/
    _adjustSelection(sel,forward) {
       if( zeroRange(sel)) {
         return newSel(forward ? this.pattern.getFirstEditableAtOrAfter(sel.start) : this.pattern.getFirstEditableAtOrBefore(sel.start));
@@ -447,15 +478,21 @@ export class RXInputMask{
    }
 
   setValue(value) {
-     if(this.getValue() === value) return true;
+     let lg = new Logger("RXInputMask:");
+     if(this.getValue() === value) {
+      lg.println("no change to:",value ).console();
+      return true;
+     } 
      let workingPattern = this.pattern.clone();
      if (value == null) {
        value = ''
      }
      workingPattern.reset();
+     lg.println("iterate over",value,"length:",value.length);
      for(let i=0; i<value.length; i++) {
         let c = value.charAt(i);
-        if(value.substring(i) === workingPattern.minChars()) break;
+        lg.print("index: ",i, "char:",c,"minChars:", workingPattern.minChars(), "sameAsRest",sameAsRest(value.substring(i),workingPattern.minChars()), "---");
+        if(sameAsRest(value.substring(i),workingPattern.minChars())) break;
         if( isHolder(c)) c = undefined;
         if(!_skipAndMatch(workingPattern,c)) {
           return false;
@@ -515,14 +552,19 @@ export class RXInputMask{
       return res;
    }
 
-   skipFixed() {
-    _skipFixed(this.pattern)
+   skipFixed(flag) {
+     return _skipFixed(this.pattern,flag)
    }
 
 
 }
 
    // *pattern Helpers
+
+  function sameAsRest(str,rest) {
+    if( str === rest ) return true;
+    return false; //( isMeta(rest[0]) && str === rest.substring(1,rest.length) ) ;
+  }
 
   function _fillInFixedValuesAtEnd(pattern) {
     let s = pattern.minChars();
@@ -540,7 +582,7 @@ export class RXInputMask{
     if( onlyFixed !== true && s.length > 1 && isOptional(s.charAt(0)) && !isMeta(s.charAt(1)) ) {
       if (aPattern.match(s.charAt(1))) return true; 
     }
-    else if( /* onlyFixed === true && */ s.length >= 1 && !isMeta(s.charAt(0))) return aPattern.match(s.charAt(0));
+    else if( /* onlyFixed === true && */ s.length > 0 && !isMeta(s.charAt(0))) return aPattern.match(s.charAt(0));
     return false;
   }
 
@@ -572,7 +614,14 @@ export function  _after(aPattern, all, ix) { /* public */ // get the input match
            return al.map(e => e[0] ).join('');
        }      
   } 
-
+class Logger {
+  constructor(X) {
+    this.content = X || "";
+  }
+  print(...s) {  this.content += "," + (s||[]).map((a) => JSON.stringify(a)).join(" "); return this; }
+  println(...s) { this.print.apply(this,s);  this.content += "\n"; return this; }
+  console() { console.log(this.content); this.content = ""; }
+}
  
 
 "use strict";

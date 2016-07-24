@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "mocha -R spec --compilers js:mocha-babel src/test/*.js",
-    "build": "babel --presets es2015 src --out-dir lib",
+    "build": "babel --presets es2015 src --out-dir lib && cp -R lib/*  ../react-maskedinput/node_modules/incr-regex-package/lib/",
     "watch:js": "babel src --out-dir lib --watch ",
     "localdeploy": "cp -R lib/*  ../react-maskedinput/node_modules/incr-regex-package/lib/"
   },

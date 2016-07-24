@@ -412,12 +412,15 @@ describe("RXInputMask Basic", () => {
       let start=rxi.selection.start, end=rxi.selection.end;
       expect(start).to.equal(end);
       expect(rxi.pattern.getFirstEditableAtOrBefore(start-1)).to.equal(0);
-            end = 1;
+      end = 1;
       rxi.backspace();
       rxi.reset();
       ins(rxi,"+914725984");
       expect(rxi.getValue()).to.equal(convertMask("+(914)-725-984_"));
       rxi.setSelection(SEL(0,1));
+         console.log("****** tracker: ", rxi.pattern.getInputTracker());
+      expect(rxi.pattern.getFirstEditableAtOrAfter(0)).to.equal(0);
+   
       expect(rxi.selection.end).to.equal(2);
       expect(rxi.pattern.getFirstEditableAtOrAfter(rxi.selection.end)).to.equal(2);
       
