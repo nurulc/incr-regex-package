@@ -341,7 +341,7 @@ export class  RxParser {
   static parse(str) {
     //console.log("str", str instanceof RegExp, isRegExp(str), RegExp);
     if( (typeof str) != 'string' ) {
-      str = str.toString().replace(/^\/|\/$/g,"");
+      str = str.toString().replace(/\\\//g, "/").replace(/^\/|\/$/g,"");
       //console.log("str-conv",str);
     }
     //console.log("str",str);

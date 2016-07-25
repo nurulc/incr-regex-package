@@ -522,4 +522,12 @@ export class IREGEX {
     if( __isDoneN(isdone) ) return MAYBE;
     return MORE;
   }
+
+  stateStr() {
+    var s = this.state();
+    
+      if(s === MORE) return "More...";
+      if( s === MAYBE) return "Done, but can have more";
+      return "Done";
+  }
 }

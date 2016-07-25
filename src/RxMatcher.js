@@ -176,4 +176,8 @@ export class RxMatcher {
   	this._lastEditableIndex = undefined;
   }
 
+  stateStr() {
+    return this.matcher.stateStr();
+  } 
+
 }

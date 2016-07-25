@@ -480,7 +480,7 @@ export class RXInputMask{
   setValue(value) {
      let lg = new Logger("RXInputMask:");
      if(this.getValue() === value) {
-      lg.println("no change to:",value ).console();
+      lg.println("no change to:",value ).flush();
       return true;
      } 
      let workingPattern = this.pattern.clone();
@@ -556,6 +556,10 @@ export class RXInputMask{
      return _skipFixed(this.pattern,flag)
    }
 
+   isDone() {
+    return this.pattern.stateStr();
+  } 
+
 
 }
 
@@ -620,7 +624,7 @@ class Logger {
   }
   print(...s) {  this.content += "," + (s||[]).map((a) => JSON.stringify(a)).join(" "); return this; }
   println(...s) { this.print.apply(this,s);  this.content += "\n"; return this; }
-  console() { console.log(this.content); this.content = ""; }
+  flush() { console.log(this.content); this.content = ""; }
 }
  
 

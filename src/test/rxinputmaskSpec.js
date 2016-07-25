@@ -33,13 +33,13 @@ import { expect} from "chai";
 
   function _skipAndMatch(aPattern, ch) {
     if(aPattern.match(ch)) {
-       console.log("GOOD",c);
+       //console.log("GOOD",c);
        return true;	
     } 
     
     let c = aPattern.minChars();
     if( !isMeta(c.charAt(0))  ) {
-    	console.log("fixed: (",c,")");
+    	//console.log("fixed: (",c,")");
     }
     let backup = aPattern.clone();
     while( _skipFixed(aPattern,false) ) {
@@ -330,7 +330,7 @@ describe("RXInputMask Basic", () => {
  			expect(rxi.selection).to.deep.equal({start: 7, end: 7});
  			ins(rxi,"16");
  			expect(rxi._getValue()).to.equal(convertMask("(914)-716-9843"));
- 			expect(rxi.selection).to.deep.equal({start: 9, end: 9});
+ 			expect(rxi.selection).to.deep.equal({start: 10, end: 10});
  		});
  	});
 
@@ -418,10 +418,11 @@ describe("RXInputMask Basic", () => {
       ins(rxi,"+914725984");
       expect(rxi.getValue()).to.equal(convertMask("+(914)-725-984_"));
       rxi.setSelection(SEL(0,1));
-         console.log("****** tracker: ", rxi.pattern.getInputTracker());
+         //console.log("****** tracker: ", rxi.pattern.getInputTracker());
       expect(rxi.pattern.getFirstEditableAtOrAfter(0)).to.equal(0);
    
       expect(rxi.selection.end).to.equal(2);
+      expect(rxi.isDone()).to.equal("More...");
       expect(rxi.pattern.getFirstEditableAtOrAfter(rxi.selection.end)).to.equal(2);
       
     });
