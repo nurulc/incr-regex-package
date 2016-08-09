@@ -1,0 +1,14 @@
+{
+  "esversion": 6,
+  "undef": "true",
+  "unused": "true",
+  "noyield":"true",
+  "strict": "false",
+  "globals": {
+    "module": false,
+    "assert": false,
+    "require": false,
+    "__dirname": false,
+    "console": false
+  }
+}
