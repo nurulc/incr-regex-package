@@ -24,7 +24,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // Amost the entire original code has been replaces but the original interfaces remain
 //
 "use strict";
-import { assign, copy, extend                                                  } from "../utils";  
+import { assign, copy, extend , arr_find                                       } from "../utils";  
 import { incrRegEx,convertMask ,isMeta, isOptional,isHolder                    } from "../incr-regex-v3";
 import { RxMatcher                    } from "../RxMatcher";  
 import {DONE,MORE,MAYBE,FAILED,/*matchable,dot,or,zero_or_one,zero_or_more, boundary, RxParser,*/ printExpr,printExprN} from '../regexp-parser';
@@ -35,7 +35,7 @@ function has(object, key) {
 }
 
 function newSel(s,e) { e = e || s; return {start: Math.min(s,e), end: Math.max(s,e)}; }
-function selPlus(sel, x,y) { return clip(newSel(sel.start+x,sel.end+(y==undefined?x:y))); }
+function selPlus(sel, x,y) { return clip(newSel(sel.start+x,sel.end+(y===undefined?x:y))); }
 function clip(sel, range,clipFnAfter, clipFnBefore) { 
   clipFnAfter = clipFnAfter || ((x) => x);
   clipFnBefore = clipFnBefore || clipFnAfter;
@@ -56,25 +56,33 @@ export class RXInputMask{
     constructor(options) {
     
     options = assign({
-      formatCharacters: null,
       pattern: null,
       selection: {start: 0, end: 0},
-      value: ''
+      value: '',
+      history: {data: [], index: null, lastOp: null}
     }, options);
 
-    if (options.pattern == null) {
+    if (options.pattern === null) {
       throw new Error('RXInputMask: you must provide a pattern.');
     }
 
   
     this.setPattern(options.pattern, {
       value: options.value,
-      selection: options.selection
+      selection: options.selection,
+      history: options.history
     });
 
   }
 
-
+  getState() {
+    let options = {
+      pattern: this.pattern.clone(),
+      selection: selPlus(this.selection,0),
+      value: this._getValue(),
+      history: {data: [], index: null, lastOp: null}
+    };
+  }
 
   /**
    * Applies a single character of input based on the current selection.
@@ -91,23 +99,21 @@ export class RXInputMask{
    }
 
    
-   let res = this._input(char, this.selection, this.pattern); // returns [status:boolean, newSelection, newPattern]
-   if( !res[0] ) return false;
+   let [result, newSel, newPat] = this._input(char, this.selection, this.pattern); // returns [status:boolean, newSelection, newPattern]
+   if( !result ) return false;
 
 
-   let valueBefore = this._getValue();
-   
-   let selectionBefore = this.selection;
-   let patternBefore = this.pattern;
+   let [valueBefore, selectionBefore, patternBefore]  = [this._getValue(), this.selection, this.pattern];
+
    this._lastOp = 'input';
-   this.selection = res[1];
-   this.pattern = res[2];
+   this.selection = newSel;
+   this.pattern = newPat;
    this.value = this.getValue();
    
    // History
-   if (this._historyIndex != null) {
+   if (this._historyIndex !== null) {
      // Took more input after undoing, so blow any subsequent history away
-     console.log('splice(', this._historyIndex, this._history.length - this._historyIndex, ')');
+     //console.log('splice(', this._historyIndex, this._history.length - this._historyIndex, ')');
      this._history.splice(this._historyIndex, this._history.length - this._historyIndex);
      this._historyIndex = null;
    }
@@ -137,8 +143,6 @@ export class RXInputMask{
          // check if we are under an empty slot, then we can set the value there without moving anything
          if( zeroRange(selection) && aPattern.emptyAt(selection.start)) {
             selection = selPlus(selection,1); ////newPattern.getFirstEditableAtOrAfter(selection.end+1);
-            //console.log("INSERTED AT SELECTION");
-            //throw new Error("Stopped Here");
          }
          
          let newPattern = aPattern.clone();  // copy the current
@@ -153,7 +157,6 @@ export class RXInputMask{
          }
          selection = this._updateSelection(selection, newPattern.getInputLength());
          endPos = Math.max(endPos, selection.end);
-         //let newPos = newPattern.getInputLength();
          let newPos = newPattern.getFirstEditableAtOrAfter(newPattern.getInputLength());
          // Put back the remainder
          // 
@@ -171,14 +174,13 @@ export class RXInputMask{
         if(inputIndex > endIndex || aPattern.isDone()) return aPattern;
         let alt = aPattern.clone();
         if( _skipAndMatch(alt, textToAdd.charAt(textPos) )) {
-            //let res = _ins(textPos+1, textToAdd, alt, inputIndex+1, endIndex);
             let res = _ins(textPos+1, textToAdd, alt, alt.getInputLength()-1, endIndex);
-            if( res != undefined ) return res;
+            if( res !== undefined ) return res;
         }
         //console.log("rx", aPattern);
-         while(_skipFixed(aPattern, false));
-         aPattern.match(undefined);
-         return _ins(textPos, textToAdd, aPattern, inputIndex+1, endIndex);
+        while(_skipFixed(aPattern, false));
+        aPattern.match(undefined);
+        return _ins(textPos, textToAdd, aPattern, inputIndex+1, endIndex);
      }
      //textToAdd = trimHolder(textToAdd);
      let retV = _ins(0, textToAdd, aPattern, inputIndex, endIndex+textToAdd.length);
@@ -204,7 +206,7 @@ export class RXInputMask{
 
     let selectionBefore = copy(this.selection);
     let valueBefore = this._getValue();
-    let start=this.selection.start, end=this.selection.end;
+    let {start, end} =this.selection;
 
     // No range selected - work on the character preceding the cursor
     if (start === end) {
@@ -215,31 +217,35 @@ export class RXInputMask{
     // Range selected - delete characters and leave the cursor at the start of the selection
     else {
       //end = this.pattern.getFirstEditableAtOrBefore(end);
+
       start = this.pattern.getFirstEditableAtOrBefore( (end < start? end : start));
       if( end === start) {
         end++;
       }
+      
       if( end <= firstIx) return;
     }
     let result = this._input(undefined, newSel(start,end), this.pattern);
     let patternBefore = this.pattern;
     if( !result[0] ) return false;
-    this.selection.start = this.selection.end = start;
     this.pattern = result[2];
+    this.selection.start = this.selection.end = start;
+    //console.log("Before:", selectionBefore, " After:",this.selection);
+    
     // History
-    if (this._historyIndex != null) {
+    if (this._historyIndex !== null) {
       // Took more input after undoing, so blow any subsequent history away
-      this._history.splice(this._historyIndex, this._history.length - this._historyIndex)
+      this._history.splice(this._historyIndex, this._history.length - this._historyIndex);
     }
     if (this._lastOp !== 'backspace' ||
         selectionBefore.start !== selectionBefore.end ||
         this._lastSelection !== null && selectionBefore.start !== this._lastSelection.start) {
-      this._history.push({value: valueBefore, selection: selectionBefore, lastOp: this._lastOp, pattern: patternBefore})
+      this._history.push({value: valueBefore, selection: selectionBefore, lastOp: this._lastOp, pattern: patternBefore});
     }
-    this._lastOp = 'backspace'
-    this._lastSelection = copy(this.selection)
+    this._lastOp = 'backspace';
+    this._lastSelection = copy(selectionBefore);
 
-    return true
+    return true;
   }
 
   del() {
@@ -270,7 +276,7 @@ export class RXInputMask{
        _historyIndex: this._historyIndex,
        _lastSelection: copy(this._lastSelection),
        pattern: this.pattern.clone()
-     }
+     };
 
    // If there are static characters at the start of the pattern and the cursor
    // or selection is within them, the static characters must match for a valid
@@ -293,11 +299,11 @@ export class RXInputMask{
    undo() {
      // If there is no history, or nothing more on the history stack, we can't undo
      if (this._history.length === 0 || this._historyIndex === 0) {
-       return false
+       return false;
      }
 
      var historyItem;
-     if (this._historyIndex == null) {
+     if (this._historyIndex === null) {
        // Not currently undoing, set up the initial history index
        this._historyIndex = this._history.length - 1;
        historyItem = this._history[this._historyIndex];
@@ -318,17 +324,17 @@ export class RXInputMask{
      this.setValue(historyItem.value);
      this.selection = historyItem.selection;
      this._lastOp = historyItem.lastOp;
-     return true
+     return true;
    }
 
    redo() {
-     if (this._history.length === 0 || this._historyIndex == null) {
+     if (this._history.length === 0 || this._historyIndex === null) {
        return false;
      }
-     var historyItem = this._history[++this._historyIndex]
+     var historyItem = this._history[++this._historyIndex];
      // If this is the last history item, we're done redoing
      if (this._historyIndex === this._history.length - 1) {
-       this._historyIndex = null
+       this._historyIndex = null;
        // If the last history item was only added to start undoing, remove it
        if (historyItem.startUndo) {
          this._history.pop();
@@ -339,7 +345,7 @@ export class RXInputMask{
      this.selection = historyItem.selection;
      this._lastOp = historyItem.lastOp;
 
-     return true
+     return true;
    }
 
    left(selection) {
@@ -366,13 +372,13 @@ export class RXInputMask{
      options = assign({
 //       selection: {start: 0, end: 0},
        value: ''
-     }, options)
+     }, options);
      this.pattern = new RxMatcher(incrRegEx(pattern));
-     this.setValue(options.value)
+     this.setValue(options.value);
      this.emptyValue = this.pattern.minChars();
      this.setSelection(options.selection);
      while(this.skipFixed(true));
-     if( zeroRange(this.selection) && this.pattern.getInputTracker().length != 0 ) {
+     if( zeroRange(this.selection) && this.pattern.getInputTracker().length !== 0 ) {
         var ss = this._getValue();
         this.setValue(ss);
         this.selection.start = this.selection.end = ss.length;
@@ -394,67 +400,15 @@ export class RXInputMask{
      this.selection = old;
      let firstEditableIndex = fea(0); // first editable after
      let lastEditableIndex = this.pattern.lastEditableIndex();
-     let range = newSel(firstEditableIndex,lastEditableIndex)
+     let range = newSel(firstEditableIndex,lastEditableIndex);
      if (zeroRange(sel)) {
        this.selection = clip(sel,range,backward(this.selection, sel)?feb:fea);
-/*       if (sel.start < firstEditableIndex) {
-         this.selection = sel;
-         this.selection.start = this.selection.end = firstEditableIndex
-         //this.pattern.setPos(firstEditableIndex);
-         return this;
-       }
-       if (sel.end > lastEditableIndex) {
-         this.selection = sel;
-         this.selection.start = this.selection.end = lastEditableIndex;
-         //this.pattern.setPos(lastEditableIndex);
-         return this;
-       }
-
-       //this.selection = sel;
-       // check if we moved left 
-       if( selection.start < old.start) { // moved left
-          let ix = this.pattern.getFirstEditableAtOrBefore(sel.start);
-          let msk = this.getValue();
-          while( isOptional(msk.charAt(ix)) && ix > firstEditableIndex) ix--;
-          this.selection = newSel(ix,ix);
-          //this.pattern.setPos(ix);
-       //   this.selection.start = this.selection.end = ix;
-          return this;   
-       }
-       else if( selection.start > old.start) {
-          let ix = this.pattern.getFirstEditableAtOrAfter(sel.start);
-          let msk = this.pattern.minChars();
-          while( isOptional(msk.charAt(ix)) && ix < msk.length) ix++;
-          this.selection = newSel(ix,ix);
-          //this.pattern.setPos(ix);
-          return this;
-       } */
      } else {
       this.selection = clip(sel,range,fea,feb);
-/*      if (this.selection.start < firstEditableIndex) {
-         this.selection.start = firstEditableIndex;
-      } 
-      if (this.selection.end < firstEditableIndex) {
-         this.selection.end = firstEditableIndex;
-      } 
-      if (this.selection.start > lastEditableIndex) {
-         this.selection.start = lastEditableIndex;
-      }
-      if (this.selection.end > lastEditableIndex) {
-         this.selection.end = lastEditableIndex;
-      }
-*/      
      }
      return this;
    }
-/*
-   setSelection(selection) {
-      if(!selection ) return this;
-      if( !this.selection ) this.selection = selection;
-      this.selection = this._adjustSelection(selection, selection.start >= this.selection.start);
-      return this;
-   }
-*/
+
    _adjustSelection(sel,forward) {
       if( zeroRange(sel)) {
         return newSel(forward ? this.pattern.getFirstEditableAtOrAfter(sel.start) : this.pattern.getFirstEditableAtOrBefore(sel.start));
@@ -471,7 +425,7 @@ export class RXInputMask{
             success &= _skipAndMatch(newPattern,c);
       }
       if( success ) {
-        _fillInFixedValuesAtEnd(newPattern)
+        _fillInFixedValuesAtEnd(newPattern);
         this.pattern = newPattern;
       }
       return success;  
@@ -480,12 +434,12 @@ export class RXInputMask{
   setValue(value) {
      let lg = new Logger("RXInputMask:");
      if(this.getValue() === value) {
-      lg.println("no change to:",value ).flush();
+      // lg.println("no change to:",value ).flush();
       return true;
      } 
      let workingPattern = this.pattern.clone();
-     if (value == null) {
-       value = ''
+     if (value === null) {
+       value = '';
      }
      workingPattern.reset();
      lg.println("iterate over",value,"length:",value.length);
@@ -504,6 +458,11 @@ export class RXInputMask{
      this.pattern = workingPattern;
      this.value = this.getValue();
      return true;
+  }
+
+  minCharsList(flag) { 
+    //if( !flag ) throw new Error("flag should be true");
+    return this.pattern.minCharsList(flag); 
   }
 
   getSelection() {
@@ -553,11 +512,23 @@ export class RXInputMask{
    }
 
    skipFixed(flag) {
-     return _skipFixed(this.pattern,flag)
+     return _skipFixed(this.pattern,flag);
    }
 
    isDone() {
-    return this.pattern.stateStr();
+    let pattern = this.pattern.clone();
+    let value = this.getValue();
+    let list = value.split('');
+    console.log("isDone: ", value);
+    if(arr_find((e) => isHolder(e),list )) return "MORE";
+
+    pattern.reset();
+    for(let i=0; i< list.length; i++) {
+      if( isMeta(list[i]) ) continue;
+      if( !pattern.match(list[i]) ) return "MORE";
+    }
+    console.log("isDone: state", pattern.stateStr());
+    return pattern.stateStr();
   } 
 
 
@@ -572,7 +543,7 @@ export class RXInputMask{
 
   function _fillInFixedValuesAtEnd(pattern) {
     let s = pattern.minChars();
-    let i = 0
+    let i = 0;
     for(;s.length > i  && !isMeta(s.charAt(0)); i++) {
       if( ! pattern.match(s.charAt(0))) return i > 0;
       s = pattern.minChars();
@@ -628,4 +599,3 @@ class Logger {
 }
  
 
-"use strict";

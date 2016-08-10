@@ -37,7 +37,7 @@ describe("regex tests", () => {
  	});
 });
 
-describe("list naumpulation", () => {
+describe("list manipulation", () => {
    describe("n_cons, n_head, n_tail, n_append, n_filter, listToArray, arrayToList", () => {
        it("construct a single item", () => {
        	   let result = n_cons('a', null); 
@@ -58,13 +58,13 @@ describe("list naumpulation", () => {
        });
        it("construct a long list", () => {
        	    let ix = (list, i) => i===0 ? n_head(list): ix(n_tail(list),i-1);
-			let res = "a,b,c,d".split(",").reduce( (a,b) => n_cons(b,a), null);
- 			expect(ix(res,0)).to.equal('d');
- 			expect(ix(res,1)).to.equal('c');
- 			expect(ix(res,2)).to.equal('b');
- 			expect(ix(res,3)).to.equal('a');
- 			//expect(listToArray(res)).to.deep.equal(['d','c','b','a']);
- 			//expect(listToArray(n_reverse(res)).to.deep.equal("a,b,c,d".split(","));
+			  let res = "a,b,c,d".split(",").reduce( (a,b) => n_cons(b,a), null);
+   			expect(ix(res,0)).to.equal('d');
+   			expect(ix(res,1)).to.equal('c');
+   			expect(ix(res,2)).to.equal('b');
+   			expect(ix(res,3)).to.equal('a');
+   			//expect(listToArray(res)).to.deep.equal(['d','c','b','a']);
+   			//expect(listToArray(n_reverse(res)).to.deep.equal("a,b,c,d".split(","));
        });
  	   it("array operations on list", () => {
        	 	let res = "a,b,c,d".split(",").reduce( (a,b) => n_cons(b,a), null);
@@ -74,28 +74,28 @@ describe("list naumpulation", () => {
 
        it("filter a list - using odd", () => {
 			let res = AL([1,2,3,4,5,6,7,8,9,10]);
- 			expect(LA(n_filter(res,odd))).to.deep.equal([1,3,5,7,9]);
+ 			    expect(LA(n_filter(odd,res))).to.deep.equal([1,3,5,7,9]);
        });
        it("concat list", () => {
-			let first = AL([1,2,3]);
-			let second = AL([4,5,6,7,8,9,10]);
- 			expect((LA(n_concat(first,second)))).to.deep.equal([1,2,3,4,5,6,7,8,9,10]);
+			   let first = AL([1,2,3]);
+			   let second = AL([4,5,6,7,8,9,10]);
+ 			   expect((LA(n_concat(first,second)))).to.deep.equal([1,2,3,4,5,6,7,8,9,10]);
        });
    });
    describe("n_reduce, n_removeall", () => {
 	  let list1_to_5 = AL([1,2,3,4,5]);
    	  
-   	  it("n_reduce", () =>{
+ /*  	  it("n_reduce", () =>{
 
-		  let res  = n_reduce(list1_to_5, (a,b) => a+b,  0);
+		  let res  = n_reduce( (a,b) => a+b, list1_to_5,  0);
 	   	  expect(res).to.equal(15);
-	   	  expect(n_reduce(list1_to_5, (a,b) => a+b,  "")).to.equal("12345");
-   	  });
+	   	  expect(n_reduce((a,b) => a+b, list1_to_5,  "")).to.equal("12345");
+   	  }); */
 
    	  it("n_removeAll", () =>{
     	  	let r3_4 = AL([3,4]);
-			let r3_4_5 = AL([3,4,5]);
-			let empty = null;
+			    let r3_4_5 = AL([3,4,5]);
+			    let empty = null;
 
      	    expect(LA(n_removeAll(list1_to_5, r3_4  ))).to.deep.equal([1,2,5]);
   		    expect(LA(n_removeAll(list1_to_5, r3_4_5))).to.deep.equal([1,2]);
@@ -157,15 +157,15 @@ describe("Stack Opertations", () => {
       
       it("n_reduce", () =>{
 
-      let res  = n_reduce(list1_to_5, (a,b) => a+b,  0);
+      let res  = n_reduce((a,b) => a+b, list1_to_5,  0);
         expect(res).to.equal(15);
-        expect(n_reduce(list1_to_5, (a,b) => a+b,  "")).to.equal("12345");
+        expect(n_reduce((a,b) => a+b, list1_to_5,  "")).to.equal("12345");
       });
 
       it("n_removeAll", () =>{
           let r3_4 = AL([3,4]);
-      let r3_4_5 = AL([3,4,5]);
-      let empty = null;
+          let r3_4_5 = AL([3,4,5]);
+          let empty = null;
 
           expect(LA(n_removeAll(list1_to_5, r3_4  ))).to.deep.equal([1,2,5]);
           expect(LA(n_removeAll(list1_to_5, r3_4_5))).to.deep.equal([1,2]);

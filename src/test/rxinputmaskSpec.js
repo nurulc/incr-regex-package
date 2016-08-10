@@ -20,6 +20,84 @@ import { RXInputMask, trimHolder  					  } from "../inputmask/RXInputMask";
 import {DONE,MORE,MAYBE,FAILED,/*matchable,dot,or,zero_or_one,zero_or_more, boundary, RxParser,*/ printExpr,printExprN} from '../regexp-parser';
 import { expect} from "chai";
 
+
+    const US = [
+        ["AL", "Alabama"],
+        ["AK", "Alaska"],
+        ["AS", "American Samoa"],
+        ["AZ", "Arizona"],
+        ["AR", "Arkansas"],
+        ["CA", "California"],
+        ["CO", "Colorado"],
+        ["CT", "Connecticut"],
+        ["DE", "Delaware"],
+        ["DC", "District Of Columbia"],
+        ["FM", "Micronesia"],
+        ["FM", "Federated States Of Micronesia"],
+        ["FL", "Florida"],
+        ["GA", "Georgia"],
+        ["GU", "Guam"],
+        ["HI", "Hawaii"],
+        ["ID", "Idaho"],
+        ["IL", "Illinois"],
+        ["IN", "Indiana"],
+        ["IA", "Iowa"],
+        ["KS", "Kansas"],
+        ["KY", "Kentucky"],
+        ["LA", "Louisiana"],
+        ["ME", "Maine"],
+        ["MH", "Marshall Islands"],
+        ["MD", "Maryland"],
+        ["MA", "Massachusetts"],
+        ["MI", "Michigan"],
+        ["MN", "Minnesota"],
+        ["MS", "Mississippi"],
+        ["MO", "Missouri"],
+        ["MT", "Montana"],
+        ["NE", "Nebraska"],
+        ["NV", "Nevada"],
+        ["NH", "New Hampshire"],
+        ["NJ", "New Jersey"],
+        ["NM", "New Mexico"],
+        ["NY", "New York"],
+        ["NC", "North Carolina"],
+        ["ND", "North Dakota"],
+        ["MP", "Mariana Islands"],
+        ["MP", "Northern Mariana Islands"],
+        ["OH", "Ohio"],
+        ["OK", "Oklahoma"],
+        ["OR", "Oregon"],
+        ["PW", "Palau"],
+        ["PA", "Pennsylvania"],
+        ["PR", "Puerto Rico"],
+        ["RI", "Rhode Island"],
+        ["SC", "South Carolina"],
+        ["SD", "South Dakota"],
+        ["TN", "Tennessee"],
+        ["TX", "Texas"],
+        ["UT", "Utah"],
+        ["VT", "Vermont"],
+        ["VI", "Virgin Islands"],
+        ["VA", "Virginia"],
+        ["WA", "Washington"],
+        ["WV", "West Virginia"],
+        ["WI", "Wisconsin"],
+        ["WY", "Wyoming"]
+    ];
+
+    const emails = "[a-zA-Z_0-9][a-zA-Z_.0-9-]*@([a-zA-Z_0-9][a-zA-Z_.0-9-]*)+"
+    const states = US.map(a => "(" +a[0] +"-"+a[1]+"|"+a[1]+"-"+a[0]+")").join("|");
+    const ssn = "Ssn: \\d{3}-\\d{2}-\\d{4}";
+    const ext = "( Ext: \\d{1,4})?";
+    const phonebase = "(\\+\\d{1,3} )?\\(\\d{3}\\)-\\d{3}-\\d{4}";
+    const phone = "Phone: "+phonebase+ext;
+    const hwc_phone = "(Home: |Cell: )" + phonebase + "|Work: "+phonebase+ext;
+    const zip = "Zip: \\d{5}(-\\d{4})?";
+    const creditcard = "CC: (\\d{4}-){3}\\d{4} exp: (0\\d|1[012])/\\d{2}";
+    
+
+
+
   function _skipFixed(aPattern, onlyFixed) {
     let s = aPattern.minChars();
     onlyFixed = !!onlyFixed;
@@ -232,6 +310,7 @@ describe("RXInputMask Basic", () => {
  			rxi = new RXInputMask({pattern: /aa[a-zA-Z]+@@\d+!!/ });
  			expect(rxi.getValue()).to.deep.equal(convertMask("aa_*@@_*!!"));
  			ins(rxi,'bcdefg@@12!!');
+      //console.log(convertMask("aa_*@@_*!!"));
  			rxi.pattern.minChars();
  			//console.log(rxi.pattern," MinChars: ", rxi.pattern.minChars());
  			expect(rxi._getValue()).to.deep.equal("aabcdefg@@12!!");
@@ -272,56 +351,56 @@ describe("RXInputMask Basic", () => {
 		it("1. Fixed pattern /\\(\\d{3}\)-\\d{3}-\\d{4}/ 1", () =>{
  			expect(rxi !== undefined).to.be.true;
  			rxi.reset()
- 			var r =  ins(rxi,"9147259843");
- 			expect(rxi._getValue()).to.equal(convertMask("(914)-725-9843"));
+ 			var r =  ins(rxi,"9147359843");
+ 			expect(rxi._getValue()).to.equal(convertMask("(914)-735-9843"));
  			expect(rxi.selection).to.deep.equal({start: 14, end: 14});
  		});
  		it("2 Fixed pattern /\\(\\d{3}\)-\\d{3}-\\d{4}/ delete (1,4)", () =>{
  			expect(rxi !== undefined).to.be.true;
  			rxi.reset();
- 			var r =  ins(rxi,"9147259843");
+ 			var r =  ins(rxi,"9147359843");
  			rxi.select(1,4);
  			rxi.backspace()
- 			expect(rxi.getValue()).to.equal(convertMask("(725)-984-3___"));
+ 			expect(rxi.getValue()).to.equal(convertMask("(735)-984-3___"));
  			expect(rxi.selection).to.deep.equal({start: 1, end: 1});
  		});
  		it("2a Fixed pattern /\\(\\d{3}\)-\\d{3}-\\d{4}/ delete (1,4)", () =>{
  			expect(rxi !== undefined).to.be.true;
  			rxi.reset();
- 			var r =  ins(rxi,"147259843");
- 			expect(rxi._getValue()).to.equal(convertMask("(147)-259-843"));
- 			expect(rxi.getRawValue()).to.equal(convertMask("147259843"));
+ 			var r =  ins(rxi,"147359843");
+ 			expect(rxi._getValue()).to.equal(convertMask("(147)-359-843"));
+ 			expect(rxi.getRawValue()).to.equal(convertMask("147359843"));
  			rxi.select(1,1);
  			ins(rxi,'9');
- 			expect(rxi._getValue()).to.equal(convertMask("(914)-725-9843"));
+ 			expect(rxi._getValue()).to.equal(convertMask("(914)-735-9843"));
  			rxi.select(1,4);
  			rxi.backspace()
- 			expect(rxi.getValue()).to.equal(convertMask("(725)-984-3___"));
+ 			expect(rxi.getValue()).to.equal(convertMask("(735)-984-3___"));
  			expect(rxi.selection).to.deep.equal({start: 1, end: 1});
  		});
- 		it("3 Fixed pattern /\\(\\d{3}\)-\\d{3}-\\d{4}/ delete (1,4) insert 999", () =>{
+ 		it("3 Fixed pattern /\\(\\d{3}\)-\\d{3}-\\d{4}/ delete (1,4) insert 914552", () =>{
  			expect(rxi !== undefined).to.be.true;
  			rxi.reset();
- 			var r =  ins(rxi,"9147259843");
+ 			var r =  ins(rxi,"9147359843");
  			rxi.select(1,4);
  			rxi.backspace()
- 			expect(rxi.getValue()).to.equal(convertMask("(725)-984-3___"));
- 			expect(rxi.getRawValue()).to.equal(convertMask("7259843"));
+ 			expect(rxi.getValue()).to.equal(convertMask("(735)-984-3___"));
+ 			expect(rxi.getRawValue()).to.equal(convertMask("7359843"));
  			ins(rxi,"9");
- 			expect(rxi._getValue()).to.equal(convertMask("(972)-598-43"));
+ 			expect(rxi._getValue()).to.equal(convertMask("(973)-598-43"));
  			ins(rxi,"87");
- 			expect(rxi._getValue()).to.equal(convertMask("(987)-725-9843"));
- 			expect(rxi.selection).to.deep.equal({start: 4, end: 4});
+ 			expect(rxi._getValue()).to.equal(convertMask("(987)-735-9843"));
+ 			expect(rxi.selection).to.deep.equal({start: 6, end: 6});
  		});
- 		it("5 Fixed pattern /\\(\\d{3}\)-\\d{3}-\\d{4}/ delete (6,10) insert 7160", () =>{
+ 		it("5 Fixed pattern /\\(\\d{3}\)-\\d{3}-\\d{4}/ delete (6,10) insert 9147359843", () =>{
  			expect(rxi !== undefined).to.be.true;
  			rxi.reset();
- 			var r =  ins(rxi,"9147259843");
+ 			var r =  ins(rxi,"9147359843");
  			rxi.select(6,10);
  			rxi.backspace();
  			//console.log(rxi.pattern);
+      expect(rxi.selection).to.deep.equal({start: 6, end: 6});
  			expect(rxi.getValue()).to.equal(convertMask("(914)-984-3___"));
- 			//console.log(rxi.pattern);
  			expect(rxi.selection).to.deep.equal({start: 6, end: 6});
  			expect(rxi.getRawValue()).to.equal(convertMask("9149843"));
  			expect(rxi.getRawValueAt(6)).to.equal(convertMask("9843"));
@@ -339,62 +418,62 @@ describe("RXInputMask Basic", () => {
 //
         let rxi = new RXInputMask({pattern: /\d{4}-\d{4}/ });
         it("0. Fixed pattern /\\d{4}-\\d{4}", () =>{
- 			expect(rxi !== undefined).to.be.true;
- 			rxi.reset();
- 			expect(rxi.pattern.minChars()).to.equal(convertMask("____-____"));
- 			var r =  ins(rxi,"1");
- 			expect(rxi.getValue()).to.equal(convertMask("1___-____"));
- 			expect(rxi.pattern.minChars()).to.equal(convertMask("___-____"));
- 
- 			expect(rxi.selection).to.deep.equal({start: 1, end: 1});
- 			rxi.setValue(convertMask("1___-____"));
- 			expect(rxi.getValue()).to.equal(convertMask("1___-____"));
- 			expect(rxi._getValue()).to.equal(convertMask("1"));
- 			rxi.setValue(convertMask("12__-____"));
- 			expect(rxi._getValue()).to.equal(convertMask("12"));
- 			//console.log(rxi);
- 			expect(rxi.getValue()).to.equal(convertMask("12__-____"));
- 			expect(rxi.pattern.minChars()).to.equal(convertMask("__-____"));
- 			rxi.setValue(convertMask("12__-____"));
- 			expect(rxi.getValue()).to.equal(convertMask("12__-____"));
- 			rxi.setValue(convertMask("123_-____"));
- 			expect(rxi.getValue()).to.equal(convertMask("123_-____"));
- 			expect(rxi.pattern.minChars()).to.equal(convertMask("_-____"));
- 			rxi.setValue(convertMask("123_-____"));
- 			expect(rxi.getValue()).to.equal(convertMask("123_-____"));
- 			rxi.setValue(convertMask("1234-____"));
- 			expect(rxi.getValue()).to.equal(convertMask("1234-____"));
- 			rxi.setValue(convertMask("1234-____"));
- 			expect(rxi.getValue()).to.equal(convertMask("1234-____"));
- 			//console.log(rxi.pattern);
- 			expect(rxi.pattern.minChars()).to.equal(convertMask("-____"));
- 			_skipAndMatch(rxi.pattern, '5');
- 			expect(rxi.getValue()).to.equal(convertMask("1234-5___"));
- 			rxi.setValue(convertMask("1234-5___"));
- 			expect(rxi.getValue()).to.equal(convertMask("1234-5___"));
+     			expect(rxi !== undefined).to.be.true;
+     			rxi.reset();
+     			expect(rxi.pattern.minChars()).to.equal(convertMask("____-____"));
+     			var r =  ins(rxi,"1");
+     			expect(rxi.getValue()).to.equal(convertMask("1___-____"));
+     			expect(rxi.pattern.minChars()).to.equal(convertMask("___-____"));
+     
+     			expect(rxi.selection).to.deep.equal({start: 1, end: 1});
+     			rxi.setValue(convertMask("1___-____"));
+     			expect(rxi.getValue()).to.equal(convertMask("1___-____"));
+     			expect(rxi._getValue()).to.equal(convertMask("1"));
+     			rxi.setValue(convertMask("12__-____"));
+     			expect(rxi._getValue()).to.equal(convertMask("12"));
+     			//console.log(rxi);
+     			expect(rxi.getValue()).to.equal(convertMask("12__-____"));
+     			expect(rxi.pattern.minChars()).to.equal(convertMask("__-____"));
+     			rxi.setValue(convertMask("12__-____"));
+     			expect(rxi.getValue()).to.equal(convertMask("12__-____"));
+     			rxi.setValue(convertMask("123_-____"));
+     			expect(rxi.getValue()).to.equal(convertMask("123_-____"));
+     			expect(rxi.pattern.minChars()).to.equal(convertMask("_-____"));
+     			rxi.setValue(convertMask("123_-____"));
+     			expect(rxi.getValue()).to.equal(convertMask("123_-____"));
+     			rxi.setValue(convertMask("1234-____"));
+     			expect(rxi.getValue()).to.equal(convertMask("1234-____"));
+     			rxi.setValue(convertMask("1234-____"));
+     			expect(rxi.getValue()).to.equal(convertMask("1234-____"));
+     			//console.log(rxi.pattern);
+     			expect(rxi.pattern.minChars()).to.equal(convertMask("-____"));
+     			_skipAndMatch(rxi.pattern, '5');
+     			expect(rxi.getValue()).to.equal(convertMask("1234-5___"));
+     			rxi.setValue(convertMask("1234-5___"));
+     			expect(rxi.getValue()).to.equal(convertMask("1234-5___"));
  			
  		});
     });
     describe("Check MaskedInput behavior backspace", () =>{
         let rxi = new RXInputMask({pattern: /\d{4}-\d{4}/ });
         it("0. Fixed pattern /\\d{4}-\\d{4}", () =>{
- 			expect(rxi !== undefined).to.be.true;
- 			rxi.reset();
- 			var r =  ins(rxi,"1");
- 			expect(rxi.getValue()).to.equal(convertMask("1___-____"));
- 			expect(rxi.pattern.minChars()).to.equal(convertMask("___-____"));
- 			rxi.setSelection(SEL(1,1));
- 			expect(rxi.selection).to.deep.equal({start: 1, end: 1});
- 			rxi.setValue(convertMask("1___-____"));
- 			expect(rxi.pattern.getFirstEditableAtOrAfter(0)).to.equal(0);
- 			let start=rxi.selection.start, end=rxi.selection.end;
- 			expect(start).to.equal(end);
- 			expect(rxi.pattern.getFirstEditableAtOrBefore(start-1)).to.equal(0);
-            end = 1;
- 			rxi.backspace();
- 			expect(rxi._getValue()).to.equal("");
- 			
- 		});
+   			expect(rxi !== undefined).to.be.true;
+   			rxi.reset();
+   			var r =  ins(rxi,"1");
+   			expect(rxi.getValue()).to.equal(convertMask("1___-____"));
+   			expect(rxi.pattern.minChars()).to.equal(convertMask("___-____"));
+   			rxi.setSelection(SEL(1,1));
+   			expect(rxi.selection).to.deep.equal({start: 1, end: 1});
+   			rxi.setValue(convertMask("1___-____"));
+   			expect(rxi.pattern.getFirstEditableAtOrAfter(0)).to.equal(0);
+   			let start=rxi.selection.start, end=rxi.selection.end;
+   			expect(start).to.equal(end);
+   			expect(rxi.pattern.getFirstEditableAtOrBefore(start-1)).to.equal(0);
+              end = 1;
+   			rxi.backspace();
+   			expect(rxi._getValue()).to.equal("");
+   			
+   		});
     });
 
     describe("Check MaskedInput complex regex", () =>{
@@ -403,6 +482,7 @@ describe("RXInputMask Basic", () => {
       expect(rxi !== undefined).to.be.true;
       rxi.reset();
       var r =  ins(rxi,"1");
+      //console.log(rxi.minCharsList());
       expect(rxi.getValue()).to.equal(convertMask("1__---____."));
       expect(rxi.pattern.minChars()).to.equal(convertMask("__---____."));
       rxi.setSelection(SEL(1,1));
@@ -415,15 +495,60 @@ describe("RXInputMask Basic", () => {
       end = 1;
       rxi.backspace();
       rxi.reset();
-      ins(rxi,"+914725984");
-      expect(rxi.getValue()).to.equal(convertMask("+(914)-725-984_"));
+      ins(rxi,"+914735984");
+      expect(rxi.getValue()).to.equal(convertMask("+(914)-735-984_"));
       rxi.setSelection(SEL(0,1));
          //console.log("****** tracker: ", rxi.pattern.getInputTracker());
       expect(rxi.pattern.getFirstEditableAtOrAfter(0)).to.equal(0);
    
       expect(rxi.selection.end).to.equal(2);
-      expect(rxi.isDone()).to.equal("More...");
+      expect(rxi.isDone()).to.equal("MORE");
       expect(rxi.pattern.getFirstEditableAtOrAfter(rxi.selection.end)).to.equal(2);
+      
+    });
+    });
+    describe("Check MaskedInput complex regex- minCharsList", () =>{
+        let rxi = new RXInputMask({pattern: /To|Be|Or|Not|Zo(12|23?)? be/ });
+        //rxi = new RXInputMask({pattern: /To/ });
+        it("0. Fixed pattern /To|Be|Or|Not|Zo(123)? be/", () =>{
+            expect(rxi !== undefined).to.be.true;
+            expect(rxi.pattern.matcher.current.length).to.equal(1);
+            expect(rxi.minCharsList(true)).to.deep.equal(['To',"Be",'Or', 'Not', 'Zo be','Zo12 be', 'Zo2 be', 'Zo23 be'].map(convertMask));
+            
+        });
+        it("1. Fixed pattern /To|Be|Or|Not|Zo(123)? be/", () =>{
+            expect(rxi !== undefined).to.be.true;
+            expect(rxi.pattern.matcher.current.length).to.equal(1);
+            expect(rxi.minCharsList()).to.deep.equal(['To',"Be",'Or', 'Not', 'Zo? be'].map(convertMask));
+            
+        });
+        let rxi1 = new RXInputMask({pattern: /To|Be|Or|Not|Zo(23[a-z])* be/ });
+        it("2. Fixed pattern /To|Be|Or|Not|Zo[a-z]* be/", () =>{
+            expect(rxi1 !== undefined).to.be.true;
+            expect(rxi1.pattern.matcher.current.length).to.equal(1);
+            expect(rxi1.minCharsList(true)).to.deep.equal(['To',"Be",'Or', 'Not', 'Zo be', 'Zo23a\u0332* be'].map(convertMask));
+            
+        });
+    });
+    //complexRx
+    describe("Check MaskedInput complex regex- minCharsList", () =>{
+        let rxi = new RXInputMask({ pattern: new RegExp([states,ssn,phone,zip,creditcard, "Email: " + emails].join("|"))});
+        //rxi = new RXInputMask({pattern: /To/ });
+        it("0. Fixed pattern /To|Be|Or|Not|To[a-z]* be/", () =>{
+      expect(rxi !== undefined).to.be.true;
+      var r =  ins(rxi,"a");
+      //console.log(rxi.minCharsList());
+      expect(rxi.pattern.matcher.current.length).to.equal(10);
+      expect(rxi.minCharsList(true)).to.deep.equal(['AL-Alabama',
+                                                'Alabama-AL',
+                                                'AK-Alaska',
+                                                'Alaska-AK',
+                                                'AS-American Samoa',
+                                                'American Samoa-AS',
+                                                'AZ-Arizona',
+                                                'Arizona-AZ',
+                                                'AR-Arkansas',
+                                                'Arkansas-AR' ]);
       
     });
     });

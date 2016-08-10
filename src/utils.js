@@ -38,6 +38,7 @@ export function assign(object) {
 }
 
 export function copy(obj) { return assign({},obj); }
+function has(obj,key) { return !!obj[key]; }
 
 export function extend(protoProps, staticProps) {
     var Parent = this, Child;
@@ -70,7 +71,7 @@ export const contract = (function() {
   // A contract that allows anything
 
   const isUndef = function(x) { return (typeof x == 'undefined'); };
-  const NVL= function(v,dflt) { return isUndef(v)? dflt: v; }
+  const NVL= function(v,dflt) { return isUndef(v)? dflt: v; };
   const any = function(x) {
       return x;
   };
@@ -185,6 +186,27 @@ export function array_eq(array, another) {
     return true;
 }
 
+export function arr_uniq(arr) {
+    var seen = {};
+    var arr2 = [];
+    for (var i = 0; i < arr.length; i++) {
+        if (!(arr[i] in seen)) {
+            arr2.push(arr[i]);
+            seen[arr[i]] = true;
+        }
+    }
+    return arr2;
+}
+
+export function arr_find(fn,arr) {
+    for (var i = 0; i < arr.length; i++) {
+        if (fn(arr[i])) {
+          return arr[i];
+        }
+    }
+    return undefined;
+}
+
 export function array_match(array, subArray, at) {
     // if the other array is a falsy value, return
     if (!array || !subArray)
@@ -234,7 +256,7 @@ export function sprefix(s1,s2) {
   return s1.length < s2.length?s1:s2;
 }
 
-// Find the prefix of two strings,
+// Find the postfix of two strings,
 //    s1 = s1_start + post;
 //    s2 = s2_start + post;
 //    rprefix(s1,s2) === post
@@ -245,7 +267,7 @@ export function rprefix(s1,s2) { return sreverse(sprefix(sreverse(s1),sreverse(s
 // shead(s,n) === head
 export function shead(s,n) { return s.length < n ? s : s.substr(0,n); }
 
-// s  = start_od_s + tail 
+// s  = start_os_s + tail 
 // n  = tail.length
 // stail(s,n) === tail
 export function stail(s,n) { return s.length < n ? s : s.substr(s.length-n,n); }
@@ -253,6 +275,8 @@ export function stail(s,n) { return s.length < n ? s : s.substr(s.length-n,n); }
 //  s1 = start_of_s1 + end
 //  s2 = end + rest_of_s2
 //  sRightMerge(s1,s2) === start_of_s1 + s2
+// example s1 = "Jim hello", s2 = "hello how are you"
+// sRightMerge(s1,s2) === "Jim hello how are you"
 //  where: end is the longet string that satisfies the relationship above
 export function sRightMerge(s1,s2) {
     let n = Math.min(s1.length,s2.length);
@@ -271,7 +295,6 @@ export function sRightMerge(s1,s2) {
 if (typeof Object.assign != 'function') {
   (function () {
     Object.assign = function (target) {
-      'use strict';
       if (target === undefined || target === null) {
         throw new TypeError('Cannot convert undefined or null to object');
       }
@@ -320,14 +343,21 @@ export function odd(x) {
     return ((+x)&1) > 0;
   }
 
+
+// push element into an array, or return the element
+export function arr_push(arr, elem) { 
+  if( arr === undefined  ) return elem;
+  arr.push(elem); 
+  return arr; 
+}
 // ===========================
-// Stack with no duplicates
+// Stack/Array with no duplicates
 
 export class StackDedup {
   constructor(v) {
     this.length = 0;
     this.data = [];
-    this.push(v);
+    v && this.push(v);
     this.maxLen = 0|0;
   }
 
@@ -368,17 +398,16 @@ export class StackDedup {
     return s;
   }
 
-  toArray() {
-    return this.reduce( (a,v) => { a.push(v); return a; }, [])
-  }
+  toArray() { return this.reduce( arr_push, []);  }
 
   reset() {
-    this.length = 0;
-    this.maxLen = 0;
+    this.length = 0|0;
+    this.maxLen = 0|0;
     return this;
   }
+
   push(v) {
-    if( !v ) return this;
+    if( v === undefined ) return this;
     let data = this.data;
     //console.log("TRY DEDUP",this.length);
     let len = this.length;
@@ -392,6 +421,24 @@ export class StackDedup {
     if( this.length > this.maxLen) this.maxLen = this.length;
     return this;
  
+  }
+
+  pop() {
+    if(this.length <= 0) return this;
+    length--;
+    return this;
+  }
+
+  top() {
+    if(this.length <= 0) return undefined;
+    return data[this.length-1];
+  }
+
+  addAll(list) {
+    //console.log("ADD ALL",list);
+    if(!list) return this;
+    list.forEach( (a) => this.push(a) );
+    return this;
   }
 
 }
@@ -409,9 +456,18 @@ class List_n {
     if( b === null) return false;
     return this.head === b.head && this.tail === b.tail; 
   }
+
+  addAll(aList) {
+    if( !aList ) return this;
+    return n_reverse(a).reduce( (rst, head) => n_cons(head, rst), this);
+  }
+
+  map(f) { return n_map(f,this); }
+  reduce(f,base) { return n_reduce(f,this, base); }
+  reverse(base) { return n_reverse(this,base)}
 }
 
-export function n_cons(elem, list) {
+export function n_cons(elem, list,base) {
   return new List_n( elem, list );
 }
 
@@ -425,8 +481,9 @@ export function n_tail(list) {
   return list.tail;
 }
 
-export function n_reverse(list, nl) {
-  nl = nl || null;
+/* note nl is optional */
+export function n_reverse(list, nl=null) {
+  //nl = nl || null;
   if (!list) return nl;
   return n_reverse(n_tail(list), n_cons(n_head(list), nl)); // simple tail recursion
 }
@@ -436,7 +493,7 @@ export function arrayToList(array) {
 }
 
 export function stringToList(str)  {  return arrayToList(str.split("")); }
-export function listToArray(list)  {  return n_reduce(list, (a, b) => { a.push(b); return a; }, []); }
+export function listToArray(list)  {  return n_reduce((a, b) => { a.push(b); return a; },list,  []); }
 export function listToString(list) {  return listToArray(list).join(''); }
 
 export function n_concat(list1, list2) {
@@ -445,28 +502,38 @@ export function n_concat(list1, list2) {
                   : n_cons(n_head(list1), n_concat(n_tail(list1), list2));
 }
 
-export function n_map(list, fn, i) {
+export function n_map(fn, list, i) {
   i = i || 0;
   return !list ? list 
-               : n_cons(fn(n_head(list), i, list), n_map(n_tail(list), fn, i + 1));
+               : n_cons(fn(n_head(list), i, list), n_map(fn, n_tail(list), i + 1));
 }
 
-export function n_filter(list, fn, i) {
+export function n_filter(fn, list, i) {
   if (!list) return list;
   i = i || 0;
-  if (fn(n_head(list), i, list)) return n_cons(n_head(list), n_filter(n_tail(list), fn, i + 1));
-  return n_filter(n_tail(list), fn, i + 1);
+  if (fn(n_head(list), i, list)) return n_cons(n_head(list), n_filter(fn, n_tail(list), i + 1));
+  return n_filter(fn, n_tail(list), i + 1);
 }
 
-export function n_reduce(list, fn, base) {
+export function n_find(fn,list,i) {
+  i = i || 0;
+  if( !list ) return null;
+  return fn(n_head(list),i,list) ? list : n_find(fn, n_tail(list), i+1);
+}
+
+export function n_reduce(fn, list, base) {
   return (!list) ? base 
-                 : n_reduce(n_tail(list), fn, fn(base, n_head(list))); // simple tail recursion
+                 : n_reduce(fn, n_tail(list), fn(base, n_head(list))); // simple tail recursion
 }
 
-export function n_removeAll(list, listOfItemsToRemove, eq) {
-  if (!eq) { eq = (a, b) =>   a == b; }
-  const inListFn = ((a) => n_reduce(listOfItemsToRemove, ((b, e) => b && !eq(a, e)),  true));
-  return n_filter(list, inListFn);
+export function n_removeAll(eq, list, listOfItemsToRemove) {
+  if (arguments.length === 2) { 
+        listOfItemsToRemove = list;
+        list = eq;
+        eq = (a, b) =>   a === b; 
+  }
+  
+  return n_filter((e) => !n_find((a) => eq(a ,e), listOfItemsToRemove), list );
 }
  
 // stringToList, listToArray, listToString, n_cons, n_head, n_tail, n_filter, n_reduce, n_map, n_concat, n_removeAll 

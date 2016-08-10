@@ -28,7 +28,7 @@ export default {
 	DONE,MORE,MAYBE,FAILED,incrRegEx,printExpr,RxParser,RXInputMask, contract, RxMatcher,
 	matchable,dot,or,zero_or_one,zero_or_more, IREGEX, 
 	convertMask ,isMeta, isOptional,isHolder 
-}
+};
 
 
 /*

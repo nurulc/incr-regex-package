@@ -16,7 +16,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 "use strict";
-import {ID, parseMulti, odd, array_eq, array_match, array_append, TOKINIZATION_RX  } from "./utils"
+import {ID, parseMulti, odd, array_eq, array_match, array_append, TOKINIZATION_RX  } from "./utils";
 
 export function MANY() {}
 export function TERM() { }
@@ -58,6 +58,10 @@ function endofstr(prev,ch) {
   let r =  isNotAlnum(ch);
   return [ (l && !r) || (!l && r) , undefined]; }
 
+//Match begining of string -- This is not suppoorted
+function begining() {
+  return false;
+}
 //==========================
 /*
 
@@ -177,6 +181,7 @@ export function copyNode(aNode) {
 	throw new Error("Copy of an invalid node " + aNode);
 }
 
+/*
 export function clearNodeMarkers(aNode) {
   if( aNode === undefined ) return undefined;
   if( aNode === DONE ) { DONE.marker = 0; return DONE; }
@@ -189,6 +194,7 @@ export function clearNodeMarkers(aNode) {
   }
   aNode.marker = 0;
 }
+*/
 
 function RX_OP(op, a, b) {
   if( op === DOT ) return RX_CONS(a,b);
@@ -261,8 +267,8 @@ function matchMapper(tokenList, ix) {
 }
 
 // Note = is the mathematical concept of equality and not an assignment
-// if no 'i' exists where matchMapper(tokebList,i) has a value 
-//  then udateTokens(list) = list
+// if no 'i' exists where matchMapper(tokenList,i) has a value 
+//  then updateTokens(list) = list
 //  else
 //    for smallest ix
 //    let map = matchMapper(pre + m + post,ix)
@@ -285,16 +291,16 @@ function updateTokens(tokenList) {
   Simple operator precedence grammar has problems with some accepable regular expression 
 
   examples:
-     /|abc.../    - expression cannot start wiht a binary operator, change to /<SKIP>|abc.../
-     /...(|)...)- expression cannot start wiht a binary operator, change to /...<SKIP>.../
-     /...(|abc...)- expression cannot start wiht a binary operator, change to /...(<SKIP>|abc.../
-     /...(xyz||abc...)- expression cannot start wiht a binary operator, change to /...(xyz|<SKIP>|abc.../
-     /...abc|)...)- expression cannot start wiht a binary operator, change to /...abc|<SKIP>).../
-     /...()...)- expression cannot start wiht a binary operator, change to /...<SKIP>.../
-     /...(<SKIP>)...)- expression cannot start wiht a binary operator, change to /...<SKIP>.../
-     /...<SKIP>*...)- expression cannot start wiht a binary operator, change to /...<SKIP>.../
-     /...<SKIP>+...)- expression cannot start wiht a binary operator, change to /...<SKIP>.../
-     /...<SKIP><SKIP>...)- expression cannot start wiht a binary operator, change to /...<SKIP>.../
+     /|abc.../    - expression cannot start with a binary operator, change to /<SKIP>|abc.../
+     /...(|)...)- expression cannot start with a binary operator, change to /...<SKIP>.../
+     /...(|abc...)- expression cannot start with a binary operator, change to /...(<SKIP>|abc.../
+     /...(xyz||abc...)- expression cannot start with a binary operator, change to /...(xyz|<SKIP>|abc.../
+     /...abc|)...)- expression cannot start with a binary operator, change to /...abc|<SKIP>).../
+     /...()...)- expression cannot start with a binary operator, change to /...<SKIP>.../
+     /...(<SKIP>)...)- reduce the complexityof skip instruction to allow further optimization, change to /...<SKIP>.../
+     /...<SKIP>*...)- optimize zero or more skips to a single skip, change to /...<SKIP>.../
+     /...<SKIP>+...)- optimize repeated skip, change to /...<SKIP>.../
+     /...<SKIP><SKIP>...)- optimized repeated skip, change to /...<SKIP>.../
 
 
 
@@ -436,13 +442,13 @@ export class  RxParser {
     return this.operator.length === 0 ? undefined : this.operator[this.operator.length-1];
   }
 
-  popOper() { return this.operand.pop() }
+  popOper() { return this.operand.pop(); }
 
   applyMulti(op, b) {
     var min = op.fn.min;
     var max = op.fn.max;
     var i;
-    if( boundary(b) ) throw new SyntaxError("repetition of boundary element: "+expr.val+ " has no meaning");
+    if( boundary(b) ) throw new SyntaxError("repetition of boundary element: '"+b.val+ "'' has no meaning");
     var applyIt = (p,b,max) => {
              if( max === 0 ) return p;
              for(i=0; i< max; i++) {
@@ -463,7 +469,7 @@ export class  RxParser {
 
     // min and max are present
     return applyIt(applyIt(b,b,min-1), { oper: ZERO_OR_ONE, left: copyNode(b)}, max-min);
-  };
+  }
 
 
   oneOrMore(expr) {

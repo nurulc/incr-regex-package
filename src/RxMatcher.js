@@ -34,14 +34,11 @@ export class RxMatcher {
 		let i = ix;
 		let tracker = this.getInputTracker();
 		for(;i < tracker.length; i++) 
-    //  if(isMeta(tracker[i][1])) return i;
       if(tracker[i][1] === undefined) return i;
 
 		let m = this.minChars();
 		i = tracker.length;
 		let j = 0;
-		//if( m.length > 0 && isOptional(m.charAt(j))) j++;
-		//for(; j<m.length && (i < ix || !isMeta(m.charAt(j))); j++,i++);
     for(; j<m.length && !isMeta(m.charAt(j)); j++,i++);
 		return i;    
   	}
@@ -115,11 +112,16 @@ export class RxMatcher {
     let s = this.matcher._after(true,0).substring(0,ix);
     p.reset();
     let ret = p.matchStr(s);
-    console.log("ix: ",ix, " str: '", s,"'");
+    //console.log("ix: ",ix, " str: '", s,"'");
     if( !ret[0] ) {
     	throw new Error( "Unexpected error (matchStr failed) from "+ p.constructor.name || "IREGEX");
     }
     return p.minChars();
+  }
+
+  minCharsList(flag) {
+     //if( !flag ) throw new Error("flag should be true");
+    return this.matcher.minCharsList(flag);
   }
 
 
@@ -168,7 +170,8 @@ export class RxMatcher {
   getFullTracker() {
   	let t = this.getInputTracker();
   	let rest = this.matcher.minChars().map(c => isMeta(c)?[c,undefined]:[c,c]);
-  	return append(t,rest);
+  	//return append(t,rest);
+    return [].concat(t,rest);
   }
 
   _resetCache() {

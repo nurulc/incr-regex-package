@@ -20,7 +20,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 import {ID, makeRegexp, parseMulti, odd, gtPrec,sprefix,rprefix,shead,stail,sRightMerge,
         stringToList, listToArray, listToString, StackDedup, n_cons, 
         n_head, n_tail, n_filter, n_reduce, n_map, n_concat, 
-        n_removeAll } from "./utils"
+        n_removeAll, flatten,arr_push , arr_uniq } from "./utils";
 
 //import {OR,ZERO_OR_ONE,,ZERO_OR_MORE,ONE_OR_MORE,DOT,FALSE,DONE,MORE,MAYBE,FAILED} from './regexp-parser';
 import {DONE,MORE,MAYBE,FAILED,copyNode, printExpr, matchable,dot,or,
@@ -61,18 +61,19 @@ export function convertMask(s) {
                         (c === "_" ? HOLDER_ANY : c ))
               ).join('');
 }
+
 export function isMeta(ch) {
   return ch == HOLDER_ANY || isOptional(ch);
 }
 
 export function isOptional(ch) {
- return  ch == HOLDER_ZERO_OR_ONE || ch == HOLDER_ZERO_OR_MORE 
+ return  ch == HOLDER_ZERO_OR_ONE || ch == HOLDER_ZERO_OR_MORE ;
 }
 
 export function isHolder(ch) { return ch === HOLDER_ANY; }
 
 function cleanMask(str) {
-  let last = undefined;
+  let last; // undefined
   let list = [];
   for(let i=0; i<str.length; i++) {
     let c = str.charAt(i);
@@ -126,6 +127,25 @@ function rationalize(s1,s2) {
   return sRightMerge(res,post);
 }
 
+// [or, p1,p2,p...]
+// [dot, p1, p2, p...]
+// [zero_or_one, p1]
+// [zero_or_more, p1]
+// function binary op form to n-arrya form
+// [ op,  [op, x, y...], z] => [ op, x, y..., z] (applied recursively)
+// [ op,  x, [op, y, z...]] => [ op, x, y, z...] (applied recursively)
+function flattenRX(arr, code,  res) {
+  if(!Array.isArray(arr)) return arr_push(res, arr);
+
+  let codex = arr[0];
+  if( code !== codex) { 
+    let r = flattenRX(arr,codex, [codex]);
+    return ( res ) ? arr_push(res, r) : r;
+  }
+  
+  return arr.reduce( (res,a) => flattenRX(a, codex, res));
+}
+
 
   function isLowerCase(ch) {
     var code = ch.charCodeAt(0);
@@ -142,76 +162,142 @@ function rationalize(s1,s2) {
   }
 
 
-// e = [Nodes, undefined || n_cons(head,tail)]
-function getMask(e) {
 
-  if( !e ) return '';
-  var rxNode = e;
-  if(rxNode === DONE ) return '';
-  if( dot(e) ) { // this is a node that concat of two regexp /AB/ => dot(A,B) - where A and B are regexp themselves
-    return getMask(rxNode.left);
-  } else if( or(rxNode) ) { //  /A|B/ => or(A,B)
-      let LL = getMask(rxNode.left);
-      let RL = getMask(rxNode.right);
-      return rationalize(LL,RL); 
+//unit = [a]
+//merge(a,b) = flatten([a,b]);
+function makeRxInfo(unit, addElem, merge, optional, mapper) {
+  const addOpt = (rxNode,prefix) => {
+    if(zero_or_more(rxNode)) return addElem(prefix, HOLDER_ZERO_OR_MORE);
+    return prefix;
   }
-  else if(zero_or_one(rxNode)) { // /A?/  => zero_or_one(A)
-      return HOLDER_ZERO_OR_ONE+getMask(rxNode.nextNode);
+  return getRxInfo;
+  //--- returns the function below ---
+  function getRxInfo(rxNode,prefix, optStop) {
+
+    if( !rxNode ) return unit(prefix);
+    if( optStop && rxNode === n_head(optStop) ) 
+      return getRxInfo(rxNode.nextNode,addOpt(rxNode, prefix),n_tail(optStop));
+    
+    if(rxNode === DONE ) return unit(prefix);
+    if( dot(rxNode) ) { // this is a node that concat of two regexp /AB/ => dot(A,B) - where A and B are regexp themselves
+      //console.log("getMaskListOLD-dot");
+      return getRxInfo(rxNode.left,prefix, optStop);
+    } else if( or(rxNode) ) { //  /A|B/ => or(A,B)
+        //console.log("getMaskListOLD - or");
+        let LL = getRxInfo(rxNode.left,prefix,optStop);
+        let RL = getRxInfo(rxNode.right,prefix,optStop);
+        return merge(LL,RL); 
+    }
+    else if(zero_or_one(rxNode)) { // /A?/  => zero_or_one(A)
+        if( optional ) {
+          return optional(rxNode, prefix, getRxInfo, optStop );
+        }  
+        else return getRxInfo(rxNode.nextNode,addElem(prefix,HOLDER_ZERO_OR_ONE), optStop);
+    }
+    else if(zero_or_more(rxNode)) { //  / A* / => zero_or_more(A)        
+        if( optional ){
+           return optional(rxNode, prefix, getRxInfo,optStop );
+        }
+        else return getRxInfo(rxNode.nextNode,addElem(prefix,HOLDER_ZERO_OR_MORE),optStop);;
+    }
+    else if( matchable(rxNode) ) {
+        let res = matchable(rxNode)(undefined);
+        let v = res[1] || (mapper?mapper(rxNode,HOLDER_ANY):HOLDER_ANY);
+        //console.log("getMaskListOLD", v);
+        return getRxInfo(rxNode.nextNode,addElem(prefix,v),optStop);
+    } 
+    else if( boundary(rxNode) ) {
+        return getRxInfo(rxNode.nextNode,prefix, optStop);
+    } 
+    return unit(prefix);
   }
-  else if(zero_or_more(rxNode)) { //  / A* / => zero_or_more(A)
-      //console.log("* ",rxNode.nextNode);
-      return HOLDER_ZERO_OR_MORE+getMask(rxNode.nextNode);
-  }
-  else if( matchable(rxNode) ) {
-      let res = matchable(rxNode)(undefined);
-      let v = res[1] || HOLDER_ANY;
-      return v + getMask(rxNode.nextNode);
-  } 
-  else if( boundary(rxNode) ) {
-      return '' + getMask(rxNode.nextNode);
-  } 
-  return '';
 }
 
+function makeArrayRxInfo(func,merge, base) {
+  return getArrayRxInfo;
 
-function getArrayMask(arr) {
-  arr = arr || new StackDedup();
-  return cleanMask(
-            arr.reduce((a,b) => {
-              let l =  getMask(b);
-              a = a || l;
-              return rationalize(a,l);
-            }, undefined )
-        );
+  function getArrayRxInfo(arr,prefix) {
+    return arr.reduce((a,b) => {
+                return merge(a,func(b,prefix));
+              }, base() ) ;
+          
+  }
 }
 
-function fixedAt(e) {
+function mapper(rxn, deflt) {
+  if( !rxn ) return deflt;
+  switch(rxn.val) {
+    case "[0-9]": 
+    case "\\d": return "9\u0332";
+    case "[A-Za-z]":
+    case "[a-zA-Z]" : 
+    case "[a-z]": return "a\u0332";
+    case "[A-Z]" : return "A\u0332";
+    case "[0-9A-Za-z]":
+    case "[A-Z0-9a-z]":
+    case "[A-Za-z0-9]":
+    case "[0-9a-zA-Z]":
+    case "[a-z0-9A-Z]":
+    case "[a-zA-Z0-9]": return "z\u0332"; 
+    default: return deflt;
+  }
+}
 
-  if( !e ) return undefined;
-  var rxNode = e;
-  if(rxNode === DONE ) return undefined;
-  if( dot(e) ) { // this is a node that concat of two regexp /AB/ => dot(A,B) - where A and B are regexp themselves
+const arrayMaskListBuilder = ( (mapper,useopt) => {
+   const unit = (a) => a ===undefined ? [] : [a];
+   const addElem = (a,b) => a+b;
+   const merge = (a,b) => flatten([a,b]);
+   const aMerge = (a,b) => flatten(arr_push(a,b));
+   const optfn = (rxn, prefix, getRxInfo, optStop) => {
+    if( rxn.left ) {
+        let ll =   getRxInfo(rxn.nextNode,prefix,optStop);
+        let rr =  getRxInfo(rxn.left,prefix, n_cons(rxn,optStop));
+        return merge(ll,rr);
+    }
+   }
+   let  optional = useopt?optfn:undefined;;
+
+   return makeArrayRxInfo(makeRxInfo(unit,addElem, merge,optional,mapper), aMerge, unit )
+});
+
+const getArrayMaskListFull = arrayMaskListBuilder(mapper,true);
+const getArrayMaskList = arrayMaskListBuilder(mapper,false);
+
+
+const getArrayMask = (() => {
+     const unit = (a) => a ;
+     const addElem = (a,b) => a+b;
+     const merge = (a,b) => rationalize(a,b);
+     const aMerge = (a,b) => rationalize(a || b, b);
+     const fn = makeArrayRxInfo(makeRxInfo(unit,addElem, merge), aMerge, unit );
+     return (rx) => cleanMask(fn(rx,''))
+   }
+  )();
+
+
+function fixedAt(rxNode) {
+
+  if( !rxNode || rxNode === DONE) return undefined;
+  if( dot(rxNode) ) { // this is a node that concat of two regexp /AB/ => dot(A,B) - where A and B are regexp themselves
     return fixedAt(rxNode.left);
-  } else if( or(rxNode) ) { //  /A|B/ => or(A,B)
-      let c = fixedAt(rxNode.left);
-      return  (!!c && c === fixedAt(rxNode.right))? c : undefined; 
-  }
-  else if(zero_or_one(rxNode)) { // /A?/  => zero_or_one(A)
-      return undefined; //fixedAt(rxNode.nextNode);
-  }
-  else if(zero_or_more(rxNode)) { //  / A* / => zero_or_more(A)
-      //console.log("* ",rxNode.nextNode);
-      return undefined; //fixedAt(rxNode.nextNode);
-  }
-  else if( matchable(rxNode) ) {
+  } else if( matchable(rxNode) ) {
       let res = matchable(rxNode)(undefined);
-      //console.log(res);
-      return res[1];
-  } 
-  else if( boundary(rxNode) ) {
-      return fixedAt(rxNode.nextNode);
-  } 
+      return res[1]; // undefined if this is not a fixed character
+  } else if( or(rxNode) ) { //  /A|B/ => or(A,B)
+      let chL = fixedAt(rxNode.left);
+      let chR = fixedAt(rxNode.right);
+      return  (chL === chR ) ? chL : undefined; // only true if the same char begins bot portions of the OR ( left | right )
+  }
+  else if(zero_or_one(rxNode) || zero_or_more(rxNode) || boundary(rxNode)) { 
+      return undefined; 
+  }
+  
   return undefined;
+}
+function getArrayFixedAt(arr) {
+  let c = arr && arr.length >0 ? fixedAt(arr.data[0]) : undefined;
+  if( c === undefined ) return undefined;
+  return  (arr).reduce((a,b) => (a === fixedAt(b))?a:undefined, c);
 }
 
 function combine(a,b) { return (a === -1 || b === -1)? -1 : a+b; }
@@ -220,80 +306,24 @@ function fixedSizePattern(rxNode) {
  if( !rxNode ) return 0;
 
   if(rxNode === DONE ) return 0;
-  if( dot(e) ) { // this is a node that concat of two regexp /AB/ => dot(A,B) - where A and B are regexp themselves
+  if( dot(rxNode) ) { // this is a node that concat of two regexp /AB/ => dot(A,B) - where A and B are regexp themselves
     return combine(fixedSizePattern(rxNode.left), fixedSizePattern(rxNode.right) );
   } else if( or(rxNode) ) { //  /A|B/ => or(A,B)
       let c = fixedSizePattern(rxNode.left);
       return  (c >= 0 && c === fixedSizePattern(rxNode.right))? c : -1; 
   }
-  else if(zero_or_one(rxNode)) { // /A?/  => zero_or_one(A)
-      return -1; //fixedAt(rxNode.nextNode);
-  }
-  else if(zero_or_more(rxNode)) { //  / A* / => zero_or_more(A)
-      //console.log("* ",rxNode.nextNode);
-      return -1; //fixedAt(rxNode.nextNode);
-  }
-  else if( matchable(rxNode) ) {   
+  else if(zero_or_one(rxNode) || zero_or_more(rxNode) ) return -1; 
+  else if( matchable(rxNode) ) { 
+      let res = matchable(rxNode)(undefined);  
       return res[1];
   } 
   else if( boundary(rxNode) ) {
-      return fixedSize(rxNode.left);
+      return fixedSizePattern(rxNode.left);
   } 
   return 0; 
 }
 
-function getArrayFixedSize(arr) {
-  let c = arr && arr.length >0 ? fixedSizePattern(arr.data[0]) : -1;
-  //console.log("c", c, arr);
-  return  (arr || new StackDedup()).reduce((a,b) => Math.min(a,fixedSizePattern(b)), c);
-}
 
-function getArrayFixedAt(arr) {
-  let c = arr && arr.length >0 ? fixedAt(arr.data[0]) : undefined;
-  //console.log("c", c, arr);
-  return  (arr || new StackDedup()).reduce((a,b) => (a && a == fixedAt(b))?a:undefined, c);
-}
-
-function getPatternLen(e) {
-
-  if( !e ) return 0;
-  var rxNode = e;
-  if(rxNode === DONE ) return 0;
-  if( dot(e) ) { // this is a node that concat of two regexp /AB/ => dot(A,B) - where A and B are regexp themselves
-    return getPatternLen(rxNode.left);
-  } else if( or(rxNode) ) { //  /A|B/ => or(A,B)
-
-      let LL = getPatternLen(rxNode.left);
-      let RL = getPatternLen(rxNode.right);
-      return LL === RL && (LL !== undefined)? LL : undefined; 
-  }
-  else if(zero_or_one(rxNode)) { // /A?/  => zero_or_one(A)
-      return undefined;
-  }
-  else if(zero_or_more(rxNode)) { //  / A* / => zero_or_more(A)
-      //console.log("* ",rxNode.nextNode);
-      return undefined;
-  }
-  else if( matchable(rxNode) ) {
-      let res = matchable(rxNode)(undefined);
-      let v = getPatternLen(rxNode.nextNode);
-      return v !== undefined ? v+1 : undefined;
-  } 
-  else if( boundary(rxNode) ) {
-      return getPatternLen(rxNode.nextNode);
-  } 
-  return 0;
-}
-
-
-function getPatternLen(arr) {
-  arr = arr || new StackDedup();
-  return arr.reduce((a,b) => {
-              let l =  getMask(b);
-              a = a || l;
-              return rationalize(a,l);
-            }, 0 );
-}
 
 // New Regexp
 export class IREGEX {
@@ -352,22 +382,28 @@ export class IREGEX {
     return this._mask;
   }
 
+  minCharsList(flag) {
+    const fn = flag ? getArrayMaskListFull : getArrayMaskList;
+    //if( !flag ) throw new Error("flag should be true");
+    return arr_uniq(fn(this.current,this.inputStr()));
+  }
+
 
 
   match(ch) { /* public */
-     let fixed = getArrayFixedAt(this.current);
+     const fixed = getArrayFixedAt(this.current);
 
      let res = this.test(ch===HOLDER_ANY?undefined:ch);
      if( res === undefined && ch && isLowerCase(ch) ) {
         res = this.test(ch.toUpperCase());
         ch = ch.toUpperCase();
      }
-     return this.update(res,ch, fixed);
+     return this._update(res,ch, fixed);
   }
 
 
   matchStr(str) { /* public */
-    let len = str.length;
+    const len = str.length;
     let b1=true,b2=0,b3=[];
     let i = 0;
     for(i=0; i<len;i++) {
@@ -380,8 +416,19 @@ export class IREGEX {
   }
 
   state() { /* public */
-    this._state = this._state || this.stateCompute();
+    this._state = this._state || this._stateCompute();
     return this._state;
+  }
+
+  stateStr() {
+      const s = this.state();
+      if(s === MORE) return "MORE"; // match is not complete but good so far
+      if( s === MAYBE) return "OK"; // match is complete but could have more
+      return "DONE";
+  }
+
+  inputStr() {
+    return this.tracker.map( (a) => a[0]).join('');
   }
 
   fixed() { return getArrayFixedAt(this.current); }
@@ -392,7 +439,6 @@ export class IREGEX {
       this.current.push(this.base);
       this.lastCh = undefined;
       this._state = undefined;
-//      this._lastEditableIndex = undefined;
       this._mask = undefined;
       return this;
     }
@@ -408,7 +454,6 @@ export class IREGEX {
          t.lastCh = this.lastCh;
          t._state = this._state;
          t._mask = undefined;
-//         t._lastEditableIndex = this._lastEditableIndex;
          t._len = this.length;
          
          return t;
@@ -429,7 +474,7 @@ export class IREGEX {
   } 
 
  
-  getArr() {
+  _getArr() {
     if( this.current === this.one ) return this.two.reset();
     return this.one.reset();
   }
@@ -449,12 +494,12 @@ export class IREGEX {
     else if( or(e) ) {
           let rl =  this.action(e.left,ch, newStack, ignoreBoundary);
           let rr =  this.action(e.right,ch,newStack, ignoreBoundary);
-          return this.result(rl,rr);
+          return this._result(rl,rr);
     }
     else if(zero_or_one(e) || zero_or_more(e)) {
           let rl =  boundary(e.left)? DONE : this.action(e.left,ch, newStack, true);
-          let rr =  this.action(e.nextNode,ch,newStack);
-          return this.result(rl,rr);
+          let rr =  this.action(e.nextNode,ch,newStack,ignoreBoundary);
+          return this._result(rl,rr);
     }
     else if( matchable(e) ) {
        let res = e.match(ch);
@@ -464,14 +509,11 @@ export class IREGEX {
        return res[0]? (e.nextNode === DONE? DONE:MORE) : FAILED; 
     }
     else if( boundary(e) ) {
-      if( ignoreBoundary ) return FAIL;
+      if( ignoreBoundary ) return FAILED;
        let res = e.match(this.lastCh,ch);
-       //console.log("boundary", res, "'"+ this.lastCh+"'", "'"+ch+"'");
        if( res[0] ) {
           e = e.nextNode;
           res = this.action(e,ch,newStack);
-         // let f = function(e) { if( e === DONE ) return "DONE"; if( e === MORE ) return "MORE"; else return "FAILED"; }
-         // console.log("boundary1", f(res), this.lastCh, ch);
           return res;
         }
        return FAILED; 
@@ -480,7 +522,7 @@ export class IREGEX {
   }
 
 
-  result(l,r) {
+  _result(l,r) {
     if( l === r) return l;
     if( l === MORE || r === MORE) return MORE;
 
@@ -489,10 +531,8 @@ export class IREGEX {
   test(ch,curr) {
       curr = curr || this.current;
       let res = FAILED;
-      let next = this.getArr();
-      let self = this;
-      curr.forEach( e => { res = self.result(self.action(e,ch,next),res); }  );
-      //console.log("Test",!!res , next.length);
+      let next = this._getArr();
+      curr.forEach( e => { res = this._result(this.action(e,ch,next),res); }  );
       if( res === FAILED  || next.length === 0) {
         return undefined;
       }
@@ -500,7 +540,7 @@ export class IREGEX {
       return next;    
   }
 
-  update(res,ch, fixed) {
+  _update(res,ch, fixed) {
           if( res !== undefined) {
             this.tracker.push([ch===undefined?HOLDER_ANY:ch, fixed]);
             if(res.maxLen > this.maxLen) this.maxLen = res.maxLen;
@@ -513,7 +553,7 @@ export class IREGEX {
           return res !== undefined;
   }
 
-  stateCompute() {
+  _stateCompute() {
     //console.log("Compute State");
     var res = this.test(undefined);
     if( res === undefined ) return DONE;
@@ -523,11 +563,5 @@ export class IREGEX {
     return MORE;
   }
 
-  stateStr() {
-    var s = this.state();
-    
-      if(s === MORE) return "More...";
-      if( s === MAYBE) return "Done, but can have more";
-      return "Done";
-  }
+
 }
