@@ -1,5 +1,52 @@
 # incr-regex-package
-A node package for incremental regular expression parsing in JavaScript; useful for input validation. In particular it was to provide a more standard way to support [masked input](https://github.com/insin/react-maskedinput). Firstly, I would like to say that the ''Masked Input'' package is very nice and I really like it. I only found the method of defining input mask rather limited. The package has nice documentation and I highly recommed you look at it. It would have been nice if the mask could be defined using a regular expression. That turns out to be hard, becuase regular exxpression will match the entire input after you haave entered it, but I have found no way to check the input as you are typing it in, check if the partial string matches the regular expression.
+A node package for incremental regular expression matching in JavaScript - matching one character at a time. This is a feature not available in the wonderful and fast RegEx capability of JavaScript, a regular expression that can match on charcter at a time. Once you have this basic capability you can do some amazing things:
+
+
+## Capabilities provided by the package
+
+1. On the fly input validation support
+1. Automatically supply input for fixed values, e.g. /Phone: [0-9]+/ it can tell you that 'Phone: ' is the only acceptable input at the begining 
+1. Provide masked input, for example a phone number  (___)-___-____
+1. Provide multiple alternative masks phone number with and without extension (___)-___-____ Ext: ___
+1. Provide masks that support variable input, for example email:  /[a-zA-Z_.-]+@[a-zA-Z_.-]+/
+1. Auto complete /Yes|No|Maybe/ - once you type 'Y' the only thing the input can be is 'Yes' and so on
+1. Show a dropdown list of possible input, /Alabama|Arizona|.../ input hint shows a list of all the states
+
+But I am getting ahead of myself, but the package has buil-in support for all those capabilities. But lets start from the simplest capability, incremental matching.
+
+
+This is an example of the incr regex in action
+
+```JavaScript
+// import {incrRegEx} from 'incr-regex-package';
+
+  var incrRegEx = require('incr-regex-package').incrRegEx;
+
+// example match a US phone number
+  var rx = incrRegEx( /\\d{3}-\\d{3}-\\d{4}/ );
+
+// we are trying to match '212-409-5123'
+
+  rx.match('2'); // => true,  matched "2..."
+  rx.match('-'); // => false , i.e. it did not accept the character
+
+  rx.match('1'); // => true ,  matched '21...'
+  rx.match('2'); // =>  true   matched '212..'
+  rx.match('4'); // =>  false , expected '-'
+
+  rx.match('-'); // => true , matched '212-...'
+  ....
+
+  rx.match('3'); // => true,  matched '212-409-5123'
+
+  rx.status() === DONE; // true
+```
+
+
+
+ Clearly, this is useful for input validation. In particular it was to provide a more standard way to support [masked input](https://github.com/insin/react-maskedinput). Firstly, I would like to say that the ''Masked Input'' package is very useful and easy to use. 
+
+What I did not like as the methord for defining the mask. It works very well I only found the method of defining input mask rather limited. The package has nice documentation and I highly recommed you look at it. It would have been nice if the mask could be defined using a regular expression. That turns out to be hard, becuase regular exxpression will match the entire input after you haave entered it, but I have found no way to check the input as you are typing it in, check if the partial string matches the regular expression.
 
 _Some of the other future possibilities with the package:_
 
