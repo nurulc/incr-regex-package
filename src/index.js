@@ -24,13 +24,23 @@ import {RxMatcher} from "./RxMatcher";
 if( incrRegEx === undefined) throw new Error("incrRegEx not defined");
 if( RXInputMask === undefined) throw new Error("RXInputMask not defined");
 if( RxMatcher === undefined) throw new Error("RxMatcher not defined");
-export default {
+/*export default {
 	DONE,MORE,MAYBE,FAILED,incrRegEx,printExpr,RxParser,RXInputMask, contract, RxMatcher,
 	matchable,dot,or,zero_or_one,zero_or_more, IREGEX, 
 	convertMask ,isMeta, isOptional,isHolder 
+};*/
+
+export  {
+  DONE,MORE,MAYBE,FAILED,incrRegEx,printExpr,RxParser,RXInputMask, contract, RxMatcher,
+  matchable,dot,or,zero_or_one,zero_or_more, IREGEX, 
+  convertMask ,isMeta, isOptional,isHolder 
 };
 
-
+window.incrRegEx = {
+  DONE,MORE,MAYBE,FAILED,incrRegEx,printExpr,RxParser,RXInputMask, contract, RxMatcher,
+  matchable,dot,or,zero_or_one,zero_or_more, IREGEX, 
+  convertMask ,isMeta, isOptional,isHolder 
+};
 /*
 const contract = {
   nat32,

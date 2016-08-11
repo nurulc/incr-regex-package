@@ -2,7 +2,9 @@
   "retainLines": false,
   "compact": true,
   "comments": false,
-  "presets": ["es2015"],
+  "presets": [
+        "es2015"
+  ],
   "whitelist": [
     "es6.arrowFunctions",
     "es6.blockScoping",

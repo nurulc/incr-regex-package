@@ -5,11 +5,10 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "mocha -R spec --compilers js:mocha-babel src/test/*.js",
-    "build": "babel --presets es2015 src --out-dir lib && cp -R lib/*  ../react-maskedinput/node_modules/incr-regex-package/lib/",
+    "build": "babel --presets es2015 src --out-dir lib && cp -R lib/*  ../react-rxinput/node_modules/incr-regex-package/lib/",
     "watch:js": "babel src --out-dir lib --watch ",
-    "lint" : "jshint src",
-    "localdeploy": "cp -R lib/*  ../react-maskedinput/node_modules/incr-regex-package/lib/"
-    
+    "lint": "jshint src",
+    "localdeploy": "cp -R lib/*  ../react-rxinput/node_modules/incr-regex-package/lib/"
   },
   "repository": {
     "type": "git",
@@ -28,10 +27,10 @@
     "matching"
   ],
   "devDependencies": {
-    "babel": "^6.1.18",
-    "babel-cli": "^6.2.0",
+    "babel": "^6.1.8",
+    "babel-cli": "^6.11.4",
     "babel-loader": "^6.2.4",
-    "babel-preset-es2015": "^6.1.18",
+    "babel-preset-es2015": "^6.1.8",
     "babel-register": "^6.7.2",
     "babel-runtime": "^6.2.0",
     "jshint": "^2.9.2",

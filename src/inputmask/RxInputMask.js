@@ -519,7 +519,7 @@ export class RXInputMask{
     let pattern = this.pattern.clone();
     let value = this.getValue();
     let list = value.split('');
-    console.log("isDone: ", value);
+    //console.log("isDone: ", value);
     if(arr_find((e) => isHolder(e),list )) return "MORE";
 
     pattern.reset();
@@ -527,7 +527,7 @@ export class RXInputMask{
       if( isMeta(list[i]) ) continue;
       if( !pattern.match(list[i]) ) return "MORE";
     }
-    console.log("isDone: state", pattern.stateStr());
+    //console.log("isDone: state", pattern.stateStr());
     return pattern.stateStr();
   } 
 
