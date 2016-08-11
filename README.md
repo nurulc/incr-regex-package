@@ -6,10 +6,10 @@ A node package for incremental regular expression matching in JavaScript - match
 
 1. On the fly input validation support
 1. Automatically supply input for fixed values, e.g. /Phone: [0-9]+/ it can tell you that 'Phone: ' is the only acceptable input at the begining 
-1. Provide masked input, for example a phone number  (___)-___-____
-1. Provide multiple alternative masks phone number with and without extension (___)-___-____ Ext: ___
-1. Provide masks that support variable input, for example email:  /[a-zA-Z_.-]+@[a-zA-Z_.-]+/
-1. Auto complete /Yes|No|Maybe/ - once you type 'Y' the only thing the input can be is 'Yes' and so on
+1. Provide masked input, for example a phone number  ```(___)-___-____```
+1. Provide multiple alternative masks phone number with and without extension ```(___)-___-____ Ext: ___```
+1. Provide masks that support variable input, for example email:  ```/[a-zA-Z_.-]+@[a-zA-Z_.-]+/```
+1. Auto complete ```/Yes|No|Maybe/``` - once you type __'Y'__ the only thing the input can be is __'Yes'__ and so on
 1. Show a dropdown list of possible input, /Alabama|Arizona|.../ input hint shows a list of all the states
 
 But I am getting ahead of myself, but the package has buil-in support for all those capabilities. But lets start from the simplest capability, incremental matching.
