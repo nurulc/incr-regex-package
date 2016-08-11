@@ -18,9 +18,9 @@ But I am getting ahead of myself, but the package has buil-in support for all th
 This is an example of the incr regex in action
 
 ```JavaScript
-// import {incrRegEx} from 'incr-regex-package';
+import {incrRegEx, DONE} from 'incr-regex-package';
 
-  var incrRegEx = require('incr-regex-package').incrRegEx;
+//  var incrRegEx = require('incr-regex-package').incrRegEx;
 
 // example match a US phone number
   var rx = incrRegEx( /\\d{3}-\\d{3}-\\d{4}/ );
@@ -60,7 +60,7 @@ What I did not like as the method for defining the mask. It works very well I on
 var ir = require("incr-regex-package");
 
 var incrRegEx = ir.incrRegEx;
-var rx = ir.incrRegEx("ab[1-10]c");
+var rx = ir.incrRegEx("ab[0-9]c");
 var DONE = ir.DONE;
 var MORE = ir.MORE;
 var MAYBE = ir.MAYBE;
