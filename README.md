@@ -39,7 +39,7 @@ import {incrRegEx, DONE} from 'incr-regex-package';
 
   rx.match('3'); // => true,  matched '212-409-5123'
 
-  rx.status() === DONE; // true
+  rx.state() === DONE; // true
 ```
 
 

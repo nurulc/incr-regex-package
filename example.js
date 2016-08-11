@@ -1,4 +1,3 @@
-"use strict";
 var irx = require("incr-regex-package");
 
 
@@ -47,7 +46,7 @@ const convertMask = irx.convertMask;
 // Lets start simple:
 
 // example match a US phone number
-  var rx = incrRegEx( /\\d{3}-\\d{3}-\\d{4}/ );
+  var rx = incrRegEx( /\d{3}-\d{3}-\d{4}/ );
 
 // we are trying to match '212-409-5123'
 
@@ -60,10 +59,10 @@ const convertMask = irx.convertMask;
 
   console.log(rx.match('-')); // => true , matched '212-...'
   console.log(rx.matchStr("409-512"));
-  console.log(rx.status() === MORE ); // => true
+  console.log(rx.state() === MORE ); // => true
   console.log(rx.match('3')); // => true,  matched '212-409-5123'
 
-  rx.status() === DONE; // true
+  rx.state() === DONE; // true
 
 // ===== so far so good =====
 
@@ -71,21 +70,23 @@ const convertMask = irx.convertMask;
 
 // lets look at some interesting stuff - print the regex
 
-console.log('' + rx1); // print the regular exp
+console.log('as rexex string rep: ' + rx1.toString()); // print the regular exp
+console.log("Mask: "+ rx1.minChars()); // show input mask;
 
 
 
 
 
-c.emailStr = "[a-zA-Z0-9_.-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]{2,})*(\\.[a-zA-Z0-9_-]{2,8})";
-c.email = c.incrRegEx(c.emailStr);
 
-c.anRx = c.incrRegEx(/aa[a-zA-Z]+@@\d+!!/); // create an incremental matcher for regex.
+var emailStr = "[a-zA-Z0-9_.-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]{2,})*(\\.[a-zA-Z0-9_-]{2,8})";
+var email = incrRegEx(c.emailStr);
 
-c.funky = new c.RxMatcher(c.anRx); // create a matcher fron an existing matcher
+var anRx = incrRegEx(/aa[a-zA-Z]+@@\d+!!/); // create an incremental matcher for regex.
+
+var funky = new RxMatcher(anRx); // create a matcher fron an existing matcher
 
 
-c.rxi1 = new c.RXInputMask({pattern: /aa[a-zA-Z]+@@\d+!!/ });
-c.rxi = new c.RXInputMask({pattern: /\+\(\d{3}\)-\d{3}-\d{4}|#\d{3}\.\d{3}X?YZ| ?\d{3}---\d{4}\./ });
-c.sel = { start: 0, end: 1};
-c.im = new c.RXInputMask({pattern: "aa[a-zA-Z]+@\\d+"});
+var rxi1 = new c.RXInputMask({pattern: /aa[a-zA-Z]+@@\d+!!/ });
+var rxi = new c.RXInputMask({pattern: /\+\(\d{3}\)-\d{3}-\d{4}|#\d{3}\.\d{3}X?YZ| ?\d{3}---\d{4}\./ });
+var sel = { start: 0, end: 1};
+var im = new c.RXInputMask({pattern: "aa[a-zA-Z]+@\\d+"});
