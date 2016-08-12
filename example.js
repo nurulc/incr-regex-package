@@ -87,8 +87,10 @@ console.log(`minCharList: [${rx1.minCharsList().toString()}]`); // give a list o
 //=== so how do we expoint that functionality ====
 
 
-var anRx = /aa[a-zA-Z]+@@\d+!!/; // regex.
-var funky = new RXInputMask({pattern:anRx}); // 
+var im = new RXInputMask({pattern: "aa[a-zA-Z]+@\\d+"});
+
+console.log(`Notice the object has already entered the first 'aa' for you: ${im._getValue()}`);
+console.log(`Selection (cursor) point to be at [2, 2] : actual :[${im.getSelection().start}, ${im.getSelection().end}]`);
 
 
 
@@ -99,6 +101,5 @@ var email = incrRegEx(emailStr);
 var emailInput = new RXInputMask({pattern: /aa[a-zA-Z]+@@\d+!!/ });
 var rxi = new RXInputMask({pattern: /\+\(\d{3}\)-\d{3}-\d{4}|#\d{3}\.\d{3}X?YZ| ?\d{3}---\d{4}\./ });
 var sel = { start: 0, end: 1};
-var im = new RXInputMask({pattern: "aa[a-zA-Z]+@\\d+"});
 
 

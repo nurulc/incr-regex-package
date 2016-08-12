@@ -4,11 +4,15 @@ var path = require('path');
 
 module.exports = {
 	devtool: 'eval',
-    entry:  './src',
+    entry:  './src/index',
     output: {
         path:     path.join(__dirname, 'build'),
         filename: 'incr-regex.js',
         publicPath: '',
+        libraryTarget: "var",
+        // name of the global var: "Foo"
+        library: "iRX",
+
     },
     module: {
         loaders: [
