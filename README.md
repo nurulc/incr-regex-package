@@ -3,7 +3,7 @@ A node package for incremental regular expression matching in JavaScript - match
 
 
 ## Capabilities provided by the package
-
+[Demo here](https://nurulc.github.io/) play with the code [here - for developers](https://tonicdev.com/npm/incr-regex-package)
 1. On the fly input validation support
 1. Automatically supply input for fixed values, e.g. /Phone: [0-9]+/ it can tell you that 'Phone: ' is the only acceptable input at the begining 
 1. Provide masked input, for example a phone number  ```(___)-___-____```
