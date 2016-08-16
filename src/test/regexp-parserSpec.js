@@ -95,11 +95,11 @@ describe("regexp tests", () => {
  		}); 
  		it("Can parse it own tokenization Rx",() =>{
  			let t = RxParser.parse(regexTokenizer);
- 			expect(printExpr(t.left.left)).to.equal("(\\[.((((\\.u)|((\\.\\])|((\\.\\)|(((\\?).\\[)|[^\\]\\[\\\\]))))*).\\]))"); // match charset [x\[\]\\\u]
+ 			expect(printExpr(t.left.left)).to.equal("([.((((\\.u)|((\\.])|((\\.\\)|(((\\?).[)|[^\\]\\[\\\\]))))*).]))"); // match charset [x\[\]\\\u]
  			expect(printExpr(t.left.right.left)).to.equal("({.((((\\d.(\\d*)).(,.(\\d.(\\d*))))|((\\d.(\\d*))|(((\\d.(\\d*)).,)|(,.(\\d.(\\d*)))))).}))"); // match {d+,d+} {,d+}  {d+, }
- 			expect(printExpr(t.left.right.right.left)).to.equal("(\\.(.|(\\||(+|(*|(?|((|()|(^|($|(d|(D|(s|(S|(b|(B|(w|(W|(\\[|(\\]|({|(}|\\))))))))))))))))))))))"); // \\ , \. \+ \. \* \? ...
+ 			expect(printExpr(t.left.right.right.left)).to.equal("(\\.(.|(||(+|(*|(?|((|()|(^|($|(d|(D|(s|(S|(b|(B|(w|(W|([|(]|({|(}|\\))))))))))))))))))))))"); // \\ , \. \+ \. \* \? ...
  			expect(printExpr(t.left.right.right.right.left)).to.equal("(((.(?.:))|((?.?)|((*.?)|(+.?))))"); // match (?: ??  *? +?
- 			expect(printExpr(t.left.right.right.right.right.left)).to.equal("(.|(\\||(+|(*|(?|((|()|(^|$))))))))"); // the standard mets characcters =  +*?.|()^$
+ 			expect(printExpr(t.left.right.right.right.right.left)).to.equal("(.|(||(+|(*|(?|((|()|(^|$))))))))"); // the standard mets characcters =  +*?.|()^$
  		});
 
  	});

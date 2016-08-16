@@ -15,10 +15,16 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 */
 
-import { incrRegEx,convertMask                        } from "../incr-regex-v3";	
-import {DONE,MORE,MAYBE,FAILED,/*matchable,dot,or,zero_or_one,zero_or_more, boundary, RxParser,*/ printExpr,printExprN} from '../regexp-parser';
+import { incrRegEx,convertMask                        } from "../incr-regex-v3";
+import { TOKINIZATION_RX }								from "../utils";
+import {DONE,MORE,MAYBE,FAILED,/*matchable,dot,or,zero_or_one,zero_or_more, boundary, RxParser,*/ printExpr,printExprN, printExprQ} from '../regexp-parser';
 import { expect} from "chai";
 
+	var regexTokenizer = '(?:\\[(?:\\\\u|\\\\\\]|\\\\\\\\|(\\\\)?\\[|[^\\]\\[\\\\])*?\\])|(?:\\{(?:\\d+,\\d+|'+
+	                     '\\d+|\\d+,|,\\d+)\\})|(?:\\\\(?:\\.|\\||\\+|\\*|\\?|\\(|\\)|\\^|\\$|d|D|s|S|b|'+
+	                     'B|w|W|\\[|\\]|\\{|\\}|\\\\))|(?:\\(\\?:|\\?\\?|\\*\\?|\\+\\?)|(?:\\.|\\||\\+|'+
+	                     '\\*|\\?|\\(|\\)|\\^|\\$)|(?:[^.+?{}\\]\\[|()\\\\])';
+function strip(rx) { return rx.toString().replace(/^\//,"").replace(/\/g?$/,"")}
 describe("regexp incremental V2", () => {
 
     describe("simple regexp test V2", () =>{
@@ -78,7 +84,16 @@ describe("regexp incremental V2", () => {
  			expect(res).to.deep.equal([true,DONE]);
  			 			
  		});
- 		
+ 		it("incrRegEx using its tokenizer ", () =>{
+ 			expect(incrRegEx !== undefined).to.be.true;
+ 			var r =  incrRegEx("(?:\\[(?:\\\\u|\\\\\\]|\\\\\\\\|(\\\\)?\\[|[^\\]\\[\\\\])*?\\])");
+			var res = r.matchStr("[a-z\\\\]");
+			console.log(printExprQ(r.base));
+			//expect([res, printExprQ(r.base)]).to.equal([]);
+			
+ 			expect(res).to.deep.equal([true,7,"[a-z\\\\]"]);
+ 			 			
+ 		});
     });
 });
 

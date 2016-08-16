@@ -150,7 +150,7 @@ export const RXTREE = { matchable,boundary,dot,or,zero_or_one,zero_or_more,
 const _metaMap = { "*": ZERO_OR_MORE, "+": ONE_OR_MORE, "?": ZERO_OR_ONE };
 const _stdRegexp = { "\\d": /\d/, "\\D": /\D/, "\\s": /\s/, "\\S": /\S/, "\\w": /\w/, "\\W": /\W/ };
 const chmap = { 't': "\t", 'n': "\n", 'r': "\r" };
-
+function logit(msg,val) { console.log("logit: "+msg); return val;}
 function convert(str) {
   if(str == '<SKIP>')               return SKIP;
   if(str == '(' || str == '(?:')    return LP;
@@ -165,7 +165,7 @@ function convert(str) {
   if((/^\{[^}]*\}$/ ).test(str))    return {type: 'U', val: str, op: 'MULTIRANGE', fn: parseMulti(str)};
   if((/^\\[dDsSwW]$/).test(str) )   return {type: 'N', val: str, multi: MANY, op: 'SPECIAL-CHARSET',match: __match(_stdRegexp[str])};
   if((/^\\[trn]$/).test(str) )      return {type: 'N', val: chmap[str.substring(1,2)], multi: TERM, op: 'NON-PRINTING',match: __match("\\"+str.substring(1))};
-  if((/^\\[.?+*{}()$^\\:]$/).test(str) ) return {type: 'N', val: str.substring(1,2), multi: TERM, op: 'SINGLE', match: __matchc(str.substring(1)) };
+  if((/^\\[.?+*{}()$^\\:|\][]$/).test(str) ) return {type: 'N', val: str.substring(1,2), multi: TERM, op: 'SINGLE', match: __matchc(str.substring(1)) };
   return { type: 'N', val: str, multi: TERM, op: 'SINGLE', match: __matchc(str) };
 }
 
@@ -498,6 +498,21 @@ export function printExpr(exp,paren) {
   }
   else if( exp === DONE) return "<DONE>";
   else return exp.val;
+}
+
+export function printExprQ(exp,paren) {
+  if( paren && exp && exp.oper) return "(" + printExprQ(exp) + ")";
+  if(exp && exp.oper ) {
+    if( exp.oper.type == 'B' ) {
+      if(exp.oper.op == '.') return "("+printExprQ(exp.left) + "." +printExprQ(exp.right)+")";
+      return "(" + printExprQ(exp.left) + "|" + printExprQ(exp.right) + ")";
+    }
+    else if( exp.oper.type == 'U' ) {
+      return "("+printExprQ(exp.left,false)+  exp.oper.val + ")";
+    }
+  }
+  else if( exp === DONE) return "<DONE>";
+  else return "'"+exp.val+"'";
 }
 
 export function printExprN(exp,paren) {
