@@ -43,11 +43,7 @@ describe("regexp tests", () => {
     
     
  	describe("parser", () => {
- 		it( "can tokenize its own tokenizer", () => {
- 			let rx = new RegExp(regexTokenizer,"g");
- 			expect(regexTokenizer.match(rx)).to.deep.equal(expectedTokens);
 
- 		}); 
  		it("regexp  ab", () =>{
  			//
  			let t = RxParser.parse("ab");
@@ -91,6 +87,19 @@ describe("regexp tests", () => {
  			//expect(zero_or_more(t.left)).to.be.true;
  			
  			
+ 		});
+ 		it( "can tokenize its own tokenizer", () => {
+ 			let rx = new RegExp(regexTokenizer,"g");
+ 			expect(regexTokenizer.match(rx)).to.deep.equal(expectedTokens);
+
+ 		}); 
+ 		it("Can parse it own tokenization Rx",() =>{
+ 			let t = RxParser.parse(regexTokenizer);
+ 			expect(printExpr(t.left.left)).to.equal("(\\[.((((\\.u)|((\\.\\])|((\\.\\)|(((\\?).\\[)|[^\\]\\[\\\\]))))*).\\]))"); // match charset [x\[\]\\\u]
+ 			expect(printExpr(t.left.right.left)).to.equal("({.((((\\d.(\\d*)).(,.(\\d.(\\d*))))|((\\d.(\\d*))|(((\\d.(\\d*)).,)|(,.(\\d.(\\d*)))))).}))"); // match {d+,d+} {,d+}  {d+, }
+ 			expect(printExpr(t.left.right.right.left)).to.equal("(\\.(.|(\\||(+|(*|(?|((|()|(^|($|(d|(D|(s|(S|(b|(B|(w|(W|(\\[|(\\]|({|(}|\\))))))))))))))))))))))"); // \\ , \. \+ \. \* \? ...
+ 			expect(printExpr(t.left.right.right.right.left)).to.equal("(((.(?.:))|((?.?)|((*.?)|(+.?))))"); // match (?: ??  *? +?
+ 			expect(printExpr(t.left.right.right.right.right.left)).to.equal("(.|(\\||(+|(*|(?|((|()|(^|$))))))))"); // the standard mets characcters =  +*?.|()^$
  		});
 
  	});
