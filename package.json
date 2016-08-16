@@ -1,6 +1,6 @@
 {
   "name": "incr-regex-package",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "An incremental regular expression parser in JavaScript; useful for input validation",
   "main": "lib/index.js",
   "scripts": {

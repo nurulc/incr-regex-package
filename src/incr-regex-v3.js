@@ -42,9 +42,9 @@ export function incrRegEx(str,v) {
 //const HOLDER_ANY = '_';//"\u2581";
 //const HOLDER_ZERO_OR_ONE = "?";//  "\u21a0"
 
-const HOLDER_ZERO_OR_MORE = "\u22ef";// "\u26b9"; //"\u20e4" ;
-const HOLDER_ANY = "\uff3f"; //"\u268a";//"\u05b7";//"\u035f"; ////"\u2581"; //"\u0332"; //"\u268a"; //
-const HOLDER_ZERO_OR_ONE = "\u25d1"; //"\u21a0";
+export const HOLDER_ZERO_OR_MORE = "\u22ef";// "\u26b9"; //"\u20e4" ;
+export const HOLDER_ANY = "\uff3f"; //"\u268a";//"\u05b7";//"\u035f"; ////"\u2581"; //"\u0332"; //"\u268a"; //
+export const HOLDER_ZERO_OR_ONE = "\u25d1"; //"\u21a0";
 
 /*
 const HOLDER_ZERO_OR_MORE = "*";
@@ -165,7 +165,7 @@ function flattenRX(arr, code,  res) {
 
 //unit = [a]
 //merge(a,b) = flatten([a,b]);
-function makeRxInfo(unit, addElem, merge, optional, mapper) {
+export function makeRxInfo(unit, addElem, merge, optional, mapper) {
   const addOpt = (rxNode,prefix) => {
     if(zero_or_more(rxNode)) return addElem(prefix, HOLDER_ZERO_OR_MORE);
     return prefix;
@@ -432,6 +432,10 @@ export class IREGEX {
   }
 
   fixed() { return getArrayFixedAt(this.current); }
+
+  getCurrentStates() {
+    return this.current.map(ID);
+  }
 
   reset() { /* public */
       this.tracker = [];
