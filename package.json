@@ -1,7 +1,7 @@
 {
   "name": "incr-regex-package",
-  "version": "0.9.6",
-  "description": "An incremental regular expression parser in JavaScript; useful for input validation",
+  "version": "0.9.7",
+  "description": "An incremental regular expression parser in JavaScript; useful for input validation, RegExp",
   "main": "lib/index.js",
   "scripts": {
     "test": "mocha -R spec --compilers js:mocha-babel src/test/*.js",
@@ -15,7 +15,7 @@
     "url": "https://github.com/nurulc/incr-regex-package.git"
   },
   "keywords": [
-    "regex",
+    "regexp",
     "incremental",
     "JavaScript",
     "validation",

@@ -52,9 +52,10 @@ function __matchc(c) {
   return function(ch) { return [!!((ch !== DONE) && (ch === undefined || ch === c)), c]; };
 }
 
-function isNotAlnum(ch) {  return /[^a-zA-Z0-9]/.test(ch||'.'); }
+function isNotAlnum(ch) {  return !/\w|\d/.test(ch||'.'); }
+function isNotAlpha(ch) {  return !/\w/.test(ch||'.'); }
 function endofstr(prev,ch) {
-  let l = isNotAlnum(prev);
+  let l = !prev || isNotAlnum(prev);
   let r =  isNotAlnum(ch);
   return [ (l && !r) || (!l && r) , undefined]; }
 
@@ -85,6 +86,8 @@ export function makeFSM(t, connector) {
   }
   else if( dot(t) ) { //( . l r) => l->r->connector
     let right = connector? makeFSM(t.right,connector): t.right;
+//    if( right && boundary(right) 
+//              && connector === DONE ) right = DONE; //  left.(\b.DONE) last thing is a word boundary just remove it
     makeFSM(t.left,right);
     return t;
   }

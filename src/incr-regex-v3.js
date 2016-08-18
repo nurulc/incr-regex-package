@@ -514,11 +514,11 @@ export class IREGEX {
     }
     else if( boundary(e) ) {
       if( ignoreBoundary ) return FAILED;
+       if( ch === DONE) return  this.action(e.nextNode,ch,newStack);// ignore the boundary
+    
        let res = e.match(this.lastCh,ch);
-       if( res[0] ) {
-          e = e.nextNode;
-          res = this.action(e,ch,newStack);
-          return res;
+       if( res[0] || ch === undefined) {
+          return  this.action(e.nextNode,ch,newStack);
         }
        return FAILED; 
     }

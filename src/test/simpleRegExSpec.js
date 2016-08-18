@@ -73,6 +73,65 @@ describe("regexp incremental V2", () => {
  			expect(r.minChars()).to.equal(convertMask('ab?'));   // minimal crring that will match the regexp
  			 			
  		});
+ 		it("Test word boundary /\\babc\\b/ new",() =>{
+ 			var r =  incrRegEx("\\babc\\b");
+ 			var res = [ r.matchStr('abc') , r.state() ]
+ 			expect(res).to.deep.equal([ [true, 3,'abc'] ,DONE]);
+ 			expect(r.state()).to.deep.equal(DONE);
+ 			 			
+ 		});
+ 		it("Test word boundary / \\b / new",() =>{
+ 			var r =  incrRegEx(" \\b ");
+ 			var res = [ r.matchStr('  ') , r.state() ];
+ 			//console.log("CURRENT", r.current.data[0]);
+ 			expect(res).to.deep.equal([ [false, 1,' '] ,MORE]);
+ 			//expect(r.state()).to.deep.equal(DONE);
+ 			 			
+ 		});
+ 		it("Test word boundary / [a-z0-9]{3}\\b / new",() =>{
+ 			var r =  incrRegEx(" [a-z0-9]{3}\\b ");
+ 			var res = [ r.matchStr(' ab1') , r.state() ]
+ 			expect(res).to.deep.equal([ [true, 4,' ab1'] ,MORE]);
+ 			expect(r.match(' ')).to.equal(true);
+ 			expect(r.state()).to.deep.equal(DONE);
+ 			 			
+ 		});
+ 		it("Test word boundary / [a-z0-9]{3}\\b / new",() =>{
+ 			var r =  incrRegEx(" [a-z0-9]{3}\\b ");
+ 			var res = [ r.matchStr(' abc') , r.state() ]
+ 			expect(res).to.deep.equal([ [true, 4,' abc'] ,MORE]);
+ 			expect(r.match(' ')).to.equal(true);
+ 			expect(r.state()).to.deep.equal(DONE);
+ 			 			
+ 		});
+
+ 		it("Test word boundary /\\b(abc\\b|abcd\\b)/ new",() =>{
+ 			var r =  incrRegEx("\\b(abc\\b|abcd\\b");
+ 			var res = [ r.matchStr('abc') , r.state() ]
+ 			expect(res).to.deep.equal([ [true, 3,'abc'] ,MAYBE]);
+ 			expect(r.state()).to.deep.equal(MAYBE);
+ 			expect(r.match('d')).to.equal(true);
+ 			expect(r.state()).to.equal(DONE);
+ 			 			
+ 		});
+ 		it("Test word boundary /\\b(abc\\b\\b|abcd\\b\\b)|abx/ new",() =>{
+ 			var r =  incrRegEx("\\b(abc\\b\\b|abcd\\b\\b)|abx");
+ 			var res = [ r.matchStr('abc') , r.state() ]
+ 			expect(res).to.deep.equal([ [true, 3,'abc'] ,MAYBE]);
+ 			expect(r.state()).to.deep.equal(MAYBE);
+ 			expect(r.match('d')).to.equal(true);
+ 			expect(r.state()).to.equal(DONE);
+ 			 			
+ 		});
+ 		it("Test word boundary /\\b(abc\\b|abcd\\b.*)/ new",() =>{
+ 			var r =  incrRegEx("\\b(abc\\b|abcd\\b.*");
+ 			var res = [ r.matchStr('abc') , r.state() ]
+ 			expect(res).to.deep.equal([ [true, 3,'abc'] ,MAYBE]);
+ 			expect(r.state()).to.deep.equal(MAYBE);
+ 			expect(r.match('d')).to.equal(true);
+ 			expect(r.state()).to.equal(MAYBE);
+ 			 			
+ 		});
  		it("incrRegEx test incremental matching => /abc|abd/ ", () =>{
  			expect(incrRegEx !== undefined).to.be.true;
  			var r =  incrRegEx("abc|abd");
@@ -84,11 +143,12 @@ describe("regexp incremental V2", () => {
  			expect(res).to.deep.equal([true,DONE]);
  			 			
  		});
+
  		it("incrRegEx using its tokenizer ", () =>{
  			expect(incrRegEx !== undefined).to.be.true;
  			var r =  incrRegEx("(?:\\[(?:\\\\u|\\\\\\]|\\\\\\\\|(\\\\)?\\[|[^\\]\\[\\\\])*?\\])");
 			var res = r.matchStr("[a-z\\\\]");
-			console.log(printExprQ(r.base));
+			//console.log(printExprQ(r.base));
 			//expect([res, printExprQ(r.base)]).to.equal([]);
 			
  			expect(res).to.deep.equal([true,7,"[a-z\\\\]"]);
