@@ -79,3 +79,17 @@ c.rxi1 = new c.RXInputMask({pattern: /aa[a-zA-Z]+@@\d+!!/ });
 c.rxi = new c.RXInputMask({pattern: /\+\(\d{3}\)-\d{3}-\d{4}|#\d{3}\.\d{3}X?YZ| ?\d{3}---\d{4}\./ });
 c.sel = { start: 0, end: 1};
 c.im = new c.RXInputMask({pattern: "aa[a-zA-Z]+@\\d+"});
+function st(arr) { return arr.map(c.printExpr).toArray().join("\n"); }
+function ot(iRx) {
+  return iRx.current === iRx.one? iRx.two : iRx.one;
+}
+function pr(iRx) {
+  return ["match: [" + st(iRx.current)+"]\n",
+          "prev: [" + st(ot(iRx))+"]\n",
+      iRx.tracker.map(a => '<'+a[0]+'>').join("")];
+}
+c.st = st;
+c.ot = ot;
+c.pr =pr;
+c.x = c.incrRegEx(/...\b\b../);
+[ c.x.matchStr("   ab"), c.x.state()]

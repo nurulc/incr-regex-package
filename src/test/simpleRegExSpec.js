@@ -17,8 +17,9 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import { incrRegEx,convertMask                        } from "../incr-regex-v3";
 import { TOKINIZATION_RX }								from "../utils";
-import {DONE,MORE,MAYBE,FAILED,/*matchable,dot,or,zero_or_one,zero_or_more, boundary, RxParser,*/ printExpr,printExprN, printExprQ} from '../regexp-parser';
+import {DONE,MORE,MAYBE,FAILED } from '../rxtree';
 import { expect} from "chai";
+import {printExpr,printExprN,printExprQ} from "../rxprint";
 
 	var regexTokenizer = '(?:\\[(?:\\\\u|\\\\\\]|\\\\\\\\|(\\\\)?\\[|[^\\]\\[\\\\])*?\\])|(?:\\{(?:\\d+,\\d+|'+
 	                     '\\d+|\\d+,|,\\d+)\\})|(?:\\\\(?:\\.|\\||\\+|\\*|\\?|\\(|\\)|\\^|\\$|d|D|s|S|b|'+

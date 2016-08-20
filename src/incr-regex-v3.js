@@ -22,15 +22,20 @@ import {ID, makeRegexp, parseMulti, odd, gtPrec,sprefix,rprefix,shead,stail,sRig
         n_head, n_tail, n_filter, n_reduce, n_map, n_concat, 
         n_removeAll, flatten,arr_push , arr_uniq } from "./utils";
 
-//import {OR,ZERO_OR_ONE,,ZERO_OR_MORE,ONE_OR_MORE,DOT,FALSE,DONE,MORE,MAYBE,FAILED} from './regexp-parser';
-import {DONE,MORE,MAYBE,FAILED,copyNode, printExpr, matchable,dot,or,
-        zero_or_one,zero_or_more,boundary, makeFSM, RxParser} from './regexp-parser';
+
+import { matchable,boundary,dot,or,zero_or_one,zero_or_more, DONE, FAILED, MORE, MAYBE,makeFSM} from "./rxtree";
+
+// matchable, boundary,
+import {RxParser} from './regexp-parser';
+import {printExpr} from "./rxprint";        
 
 /*
 export function regexx(str,v) {
   return new RX(str, v);
 }
 */
+
+[matchable,boundary,dot,or,zero_or_one,zero_or_more, DONE, FAILED, MORE, MAYBE, makeFSM].map( e => { if( e ===undefined ) throw new Error("boundary not defined") } );
 
 export function incrRegEx(str,v) {
   return new IREGEX(str, v);
@@ -486,8 +491,9 @@ export class IREGEX {
 
   action(e, ch, newStack,ignoreBoundary) {
     if(e === DONE ) {
-      if(ch === DONE ) { 
-        newStack.push(DONE); 
+      if(ch === DONE) { 
+        newStack.push(DONE);
+        //if(this.nurul)  console.log("*** DONE: ",ch);
         return DONE; 
       }
       return FAILED;
@@ -507,6 +513,7 @@ export class IREGEX {
     }
     else if( matchable(e) ) {
        let res = e.match(ch);
+       //if(this.nurul) console.log("match: ",ch);
        if( res[0] ) {
           newStack.push(e.nextNode);
         }
@@ -514,7 +521,8 @@ export class IREGEX {
     }
     else if( boundary(e) ) {
       if( ignoreBoundary ) return FAILED;
-       if( ch === DONE) return  this.action(e.nextNode,ch,newStack);// ignore the boundary
+      //if( ch === DONE && this.nurul) console.log("boundary",ch)
+      if( ch === DONE) return  this.action(e.nextNode,ch,newStack);// ignore the boundary
     
        let res = e.match(this.lastCh,ch);
        if( res[0] || ch === undefined) {
@@ -560,9 +568,10 @@ export class IREGEX {
   _stateCompute() {
     //console.log("Compute State");
     var res = this.test(undefined);
+    //if( this.nurul && res !== undefined) console.log("state:",res);
     if( res === undefined ) return DONE;
     let isdone = this.test(DONE);
-    //console.log("isDone", !!isdone);
+    //if(isdone === undefined) return DONE;
     if( __isDoneN(isdone) ) return MAYBE;
     return MORE;
   }

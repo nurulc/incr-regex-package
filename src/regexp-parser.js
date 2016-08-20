@@ -17,11 +17,11 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 import {ID, parseMulti, odd, array_eq, array_match, array_append, TOKINIZATION_RX  } from "./utils";
+import {printExpr} from "./rxprint";
+import { MANY, TERM, PERHAPS_MORE, BOUNDARY, ANYCH, matchable,boundary,dot,or,zero_or_one,zero_or_more,anychar,charset,OP,
+        SKIP, BS, LP, RP, OR,  ZERO_OR_ONE, ZERO_OR_MORE, ONE_OR_MORE, DOT, FALSE, DONE, 
+        RX_OP, RX_UNARY, RX_CONS,RX_OR, RX_ZERO_OR_ONE,RX_ZERO_OR_MORE, RX_ONE_OR_MORE, copyNode, stdRxMeta,makeCharSet, makeFSM } from "./rxtree"
 
-export function MANY() {}
-export function TERM() { }
-export function PERHAPS_MORE(){ }
-export function BOUNDARY(){ }
 
 if( ! array_append ) {
   throw new Error("array_append is undefined");
@@ -34,7 +34,7 @@ function isMulti(op) {
 
 // Matching function
 // =================
-function __matchX(regexp) {
+/*function __matchX(regexp) {
   return function(ch) { return [ch !== DONE && (ch === undefined || ch.match(regexp)), undefined]; };
 }
 
@@ -43,13 +43,14 @@ function __matchcX(c) {
   return function(ch) { return [(ch !== DONE) && (ch === undefined || ch == c), c]; };
 }
 
-function __match(regexp) {
-  return function(ch) { return [!!(ch !== DONE && (ch === undefined || ch.match(regexp))), undefined]; };
-}
 
-function anych(ch) { return [ch !== DONE, undefined]; }
+//function anych(ch) { return [ch !== DONE, undefined]; }
+*/
+
+const MATCH_FALSE = [false,undefined];
+const MATCH_TRUE  = [true,undefined];
 function __matchc(c) {
-  return function(ch) { return [!!((ch !== DONE) && (ch === undefined || ch === c)), c]; };
+  return function(ch) { return !!((ch !== DONE) && (ch === undefined || ch === c))?[true, c]:MATCH_FALSE; };
 }
 
 function isNotAlnum(ch) {  return !/\w|\d/.test(ch||'.'); }
@@ -57,7 +58,7 @@ function isNotAlpha(ch) {  return !/\w/.test(ch||'.'); }
 function endofstr(prev,ch) {
   let l = !prev || isNotAlnum(prev);
   let r =  isNotAlnum(ch);
-  return [ (l && !r) || (!l && r) , undefined]; }
+  return (l && !r) || (!l && r) ? MATCH_TRUE:MATCH_FALSE; }
 
 //Match begining of string -- This is not suppoorted
 function begining() {
@@ -79,72 +80,9 @@ cases of t:
       - A ?          =>  t -> connector, A -> connector
 */
 
-export function makeFSM(t, connector) {
-  if( (matchable(t) || boundary(t)) && connector) { // t => t->connector
-    t.nextNode = connector;
-    return t;
-  }
-  else if( dot(t) ) { //( . l r) => l->r->connector
-    let right = connector? makeFSM(t.right,connector): t.right;
-//    if( right && boundary(right) 
-//              && connector === DONE ) right = DONE; //  left.(\b.DONE) last thing is a word boundary just remove it
-    makeFSM(t.left,right);
-    return t;
-  }
-  else if(or(t) && connector) { // ( | l r) => ( | l->connector  r->connector)
-    if( t.left === SKIP ) t.left = connector;
-    else makeFSM(t.left, connector);
-    if( t.right === SKIP ) t.right = connector;
-    else makeFSM(t.right,connector);
-    return t;
-  }
-  else if(zero_or_one(t) && connector) { // ( ? l) => (? l->connector)->connector
-    makeFSM(t.left,connector);
-    t.nextNode = connector;
-    return t;
-  }
-  else if(zero_or_more(t) && connector) { // ( * l) => (? l->self)->connector
-    let self = t;
-    makeFSM(t.left,self);
-    t.nextNode = connector;
-    return t;
-  }
-  return t;
-}
 
-function OP(x, msg) {
-  var toStr = function() { return msg || x.val;};
-  x.toString = toStr;
-  return x;
-} 
 
-       const SKIP =         OP({type: 'N', val: "<SKIP>", multi: TERM, op: 'SKIP', match: anych });
-       const BS =           OP({type: 'N', val: "\b", multi: TERM,     op: 'SINGLE',   match: __match(/[\b]/) });
-       const LP =           OP({type: 'L', val: ')'});
-       const RP =           OP({type: 'R', val: ')'});
-       const OR =           OP({type: 'B', val: '|', op: 'OR'});
-       const ZERO_OR_ONE =  OP({type: 'U', val: "?", op: 'MULTI'});
-       const ZERO_OR_MORE = OP({type: 'U', val: "*", op: 'MULTI'});
-       const ONE_OR_MORE =  OP({type: 'U', val: "+", op: 'MULTI'});
-       const DOT =          OP({type: 'B', val: '.', op: '.'});
-       const FALSE =        function() { return false; };
 
-export const DONE  =        OP({type: 'N', val: "DONE", multi: BOUNDARY, op: 'DONE', match: FALSE }); // cannot match any more
-export const MORE  =        OP({type: 'N', val: "MORE", multi: BOUNDARY, op: 'MORE', match: FALSE }); // regex not yet done, more to match
-export const MAYBE =        OP({type: 'N', val: "MAYBE", multi: BOUNDARY, op: 'MAYBE', match: FALSE }); // done, but could match more
-export const FAILED =       OP({type: 'N', val: "FAILED", multi: BOUNDARY, op: 'FAILED', match: FALSE }); // (should never be here) the pattern does not match
-
-export function matchable(node) {  return node && (!node.oper) && node.multi !== BOUNDARY && node.match ; } // return the matcher function or false
-export function boundary(node) {  return node && (!node.oper) && node.multi === BOUNDARY && node.match ; }  // return the matcher function or false
-export function dot(exp) { return exp && (exp.oper === DOT); }
-export function or(exp) { return  exp && (exp.oper === OR); } 
-export function zero_or_one(exp) { return exp && (exp.oper === ZERO_OR_ONE); }
-export function zero_or_more(exp) { return exp && (exp.oper === ZERO_OR_MORE); }
-export function anychar(exp) { return exp && (exp.type === 'N' && exp.op === 'ANY'); }
-export function charset(exp) { return exp && (exp.type === 'N' && (exp.op === 'CHARSET' || exp.op === 'SPECIAL-CHARSET')); }
-
-export const RXTREE = { matchable,boundary,dot,or,zero_or_one,zero_or_more,
-                  OR,  ZERO_OR_ONE, ZERO_OR_MORE, ONE_OR_MORE, DOT, FALSE };
 
 
 //matchable,dot,or,zero_or_one,zero_or_more
@@ -158,31 +96,20 @@ function convert(str) {
   if(str == '<SKIP>')               return SKIP;
   if(str == '(' || str == '(?:')    return LP;
   if(str == ')' )                   return RP;
-  if(str == '.' )                   return {type: 'N', val: "(.)", multi: MANY, op: 'ANY', match: anych };
-  if(str == '[\\b]' )               return {type: 'N', val: "\b", multi: TERM,     op: 'SINGLE',   match: __match(/[\b]/) };
+  if(str == '.' )                   return ANYCH();
+  if(str == '[\\b]' )               return BS;
   if(str == '^' || str == '$' )     return {type: 'N', val: str,  multi: BOUNDARY, op: 'BOUNDARY', match: begining};
   if(str == '\\b' || str == '\\B' ) return {type: 'N', val: str,  multi: BOUNDARY, op: 'BOUNDARY', match: endofstr};
-  if((/^\[.*\]$/).test(str) )       return {type: 'N', val: str,  multi: MANY,     op: 'CHARSET', match: __match(new RegExp(str))};
+  if((/^\[.*\]$/).test(str) )       return makeCharSet(str);//{type: 'N', val: str,  multi: MANY,     op: 'CHARSET', match: __match(new RegExp(str))};
   if(str == '|' )                   return OR;
   if((/^[?+*]\??$/).test(str)  )    return _metaMap[str.substring(0,1)];
   if((/^\{[^}]*\}$/ ).test(str))    return {type: 'U', val: str, op: 'MULTIRANGE', fn: parseMulti(str)};
-  if((/^\\[dDsSwW]$/).test(str) )   return {type: 'N', val: str, multi: MANY, op: 'SPECIAL-CHARSET',match: __match(_stdRegexp[str])};
+  if((/^\\[dDsSwW]$/).test(str) )   return stdRxMeta(str); //{type: 'N', val: str, multi: MANY, op: 'SPECIAL-CHARSET',match: __match(_stdRegexp[str])};
   if((/^\\[trn]$/).test(str) )      return {type: 'N', val: chmap[str.substring(1,2)], multi: TERM, op: 'NON-PRINTING',match: __match("\\"+str.substring(1))};
   if((/^\\[.?+*{}()$^\\:|\][]$/).test(str) ) return {type: 'N', val: str.substring(1,2), multi: TERM, op: 'SINGLE', match: __matchc(str.substring(1)) };
   return { type: 'N', val: str, multi: TERM, op: 'SINGLE', match: __matchc(str) };
 }
 
-export function copyNode(aNode) {
-	if( aNode === undefined ) return undefined;
-	if( aNode === DONE ) return DONE;
-  //if( aNode.type === 'U' ) return {type: 'U', val: aNode.val, op: aNode.op, match: aNode.match};
-	if( aNode.type === 'N' && aNode.oper === undefined ) return {type: 'N', val: aNode.val, multi: aNode.multi, op: aNode.op, match: aNode.match};
-	if( aNode.left && (dot(aNode) || zero_or_one(aNode) || zero_or_more(aNode) || or(aNode)) ) {
-		if( aNode.right ) return { oper: aNode.oper, left: copyNode(aNode.left), right: copyNode(aNode.right)};
-		else return { oper: aNode.oper, left: copyNode(aNode.left) };
-	}
-	throw new Error("Copy of an invalid node " + aNode);
-}
 
 /*
 export function clearNodeMarkers(aNode) {
@@ -199,19 +126,7 @@ export function clearNodeMarkers(aNode) {
 }
 */
 
-function RX_OP(op, a, b) {
-  if( op === DOT ) return RX_CONS(a,b);
-  if( op === OR )  return RX_OR(a,b);
-  return !b ? a : { oper: op, left: a , right: b};
-}
-function RX_CONS(a,b) {
-  if( a === SKIP ) return b;
-  if( b === SKIP ) return a;
-  return !b ? a : { oper: DOT, left: a , right: b}; 
-}
-function RX_OR(a,b) { return !b ? a : { oper: OR, left: a , right: b}; }
-function RX_ZERO_OR_MORE(a) { return { oper: ZERO_OR_MORE, left: a }; }
-function RX_ONE_OR_MORE(a) { return RX_CONS(a, RX_ZERO_OR_MORE(copyNode(a))); }
+
 
 
 // =============
@@ -320,6 +235,7 @@ function fixTokens(tokenList) {
   }
   return tokenList;
 }
+
 function isRegExp(s) { return s instanceof RegExp; }
 
 // Actual parser
@@ -392,7 +308,7 @@ export class  RxParser {
                  break;
       case 'U' : this.pushOp(c, this.basePrec+7); this.opState(false,false,c); break;
       case 'N' : this.operand.push(c);            this.opState(true,false,c);  break;
-      default  : throw Error("Syntax error");
+      default  : throw Error("Syntax error - in regexp");
     }
     return this;
   }
@@ -404,7 +320,7 @@ export class  RxParser {
       var a,b;
 
       b = this.popOper();
-      if( !t.op.type || t.op.type == 'B' ) {
+      if( !t.op.type || t.op.type === 'B' ) {
         a = this.popOper(); //console.log("pushOp",{ op: t.op, left: a, right: b });
         this.operand.push(RX_OP(t.op, a, b) );
       }
@@ -462,86 +378,32 @@ export class  RxParser {
           };
     // 0 or more
     if( min === 0 ) {
-      if( max === undefined ) return { oper: ZERO_OR_MORE, left: b};
-      else                    return applyIt(undefined, { oper: ZERO_OR_ONE, left: b},max);
+      if( max === undefined ) return RX_ZERO_OR_MORE(b);//{ oper: ZERO_OR_MORE, left: b};
+      else                    return applyIt(undefined, RX_ZERO_OR_ONE(b)/*{ oper: ZERO_OR_ONE, left: b}*/,max);
     }
     else if( max === undefined) {
     // 1 or more
-      return applyIt(applyIt(undefined,b,min), { oper: ZERO_OR_MORE, left: b}, 1);
+      return applyIt(applyIt(undefined,b,min),  RX_ZERO_OR_MORE(b)/*{ oper: ZERO_OR_MORE, left: b}*/, 1);
     }
 
     // min and max are present
-    return applyIt(applyIt(b,b,min-1), { oper: ZERO_OR_ONE, left: copyNode(b)}, max-min);
+    return applyIt(applyIt(b,b,min-1), RX_ZERO_OR_ONE(copyNode(b))/*{ oper: ZERO_OR_ONE, left: copyNode(b)}*/, max-min);
   }
 
 
   oneOrMore(expr) {
     if( boundary(expr)) throw new SyntaxError("repetition of boundary element: "+expr.val+ " has no meaning");
     //this.operand.push({oper: DOT, left: expr, right:{ oper: ZERO_OR_MORE, left: expr}});
-    this.operand.push(RX_CONS(expr, RX_ZERO_OR_MORE(copyNode(expr))));
+    this.operand.push(RX_ONE_OR_MORE(expr)/*RX_CONS(expr, RX_ZERO_OR_MORE(copyNode(expr)))*/);
   }
 
   unaryOp(op, expr) {
     if( boundary(expr) ) throw new SyntaxError("modifier (" +op.val+") of boundary element: "+expr.val+ " has no meaning");
-    this.operand.push({ oper: op, left: expr});
+    this.operand.push(RX_UNARY(op, expr));
   }
 
 }
 
-export function printExpr(exp,paren) {
-  if( paren && exp && exp.oper) return "(" + printExpr(exp) + ")";
-  if(exp && exp.oper ) {
-    if( exp.oper.type == 'B' ) {
-      if(exp.oper.op == '.') return "("+printExpr(exp.left) + "." +printExpr(exp.right)+")";
-      return "(" + printExpr(exp.left) + "|" + printExpr(exp.right) + ")";
-    }
-    else if( exp.oper.type == 'U' ) {
-      return "("+printExpr(exp.left,false)+  exp.oper.val + ")";
-    }
-  }
-  else if( exp === DONE) return "<DONE>";
-  else return exp.val;
-}
-
-export function printExprQ(exp,paren) {
-  if( paren && exp && exp.oper) return "(" + printExprQ(exp) + ")";
-  if(exp && exp.oper ) {
-    if( exp.oper.type == 'B' ) {
-      if(exp.oper.op == '.') return "("+printExprQ(exp.left) + "." +printExprQ(exp.right)+")";
-      return "(" + printExprQ(exp.left) + "|" + printExprQ(exp.right) + ")";
-    }
-    else if( exp.oper.type == 'U' ) {
-      return "("+printExprQ(exp.left,false)+  exp.oper.val + ")";
-    }
-  }
-  else if( exp === DONE) return "<DONE>";
-  else return "'"+exp.val+"'";
-}
-
-export function printExprN(exp,paren) {
-  if( paren && exp && exp.oper) return "(" + printExpr(exp) + ")";
-  if(exp && exp.oper ) {
-    if( exp.oper.type == 'B' ) {
-      if(exp.oper.op == '.') {
-        if( exp.nextNode) 
-          return "("+printExprN(exp.left) + "." +printExprN(exp.nextNode)+")";
-        else return printExprN(exp.left);
-      }  
-      return "(" + printExprN(exp.left) + "|" + printExprN(exp.right) + ")";
-    }
-    else if( exp.oper.type == 'U' ) {
-      if( exp.nextNode ) {
-         return "(("+printExpr(exp.left,false)+  exp.oper.val + ")." + printExprN(exp.nextNode)+ ")";
-      }
-      return "("+printExpr(exp.left,false)+  exp.oper.val + ")";
-    }
-  }
-  else if( exp === DONE) return "<DONE>";
-  else {
-    if( exp && exp.nextNode ) return "("+exp.val + "." +printExprN(exp.nextNode)+")";
-    return exp ? exp.val: '';
-  }
-}
 
 // Generate a string that will match the regex.
 //

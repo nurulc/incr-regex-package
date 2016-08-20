@@ -16,8 +16,22 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 import { incrRegEx,convertMask                        } from "../incr-regex-v3";	
-import {DONE,MORE,MAYBE,FAILED,/*matchable,dot,or,zero_or_one,zero_or_more, boundary, RxParser,*/ printExpr,printExprN} from '../regexp-parser';
+//import {DONE,MORE,MAYBE,FAILED} from '../regexp-parser';
+import {DONE,MORE,MAYBE,FAILED } from '../rxtree';
 import { expect} from "chai";
+import {printExpr,printExprN} from "../rxprint";
+
+// print current state of regexp
+function st(arr) { return arr.map(printExpr).toArray().join("\n"); }
+function ot(iRx) {
+	return iRx.current === iRx.one? iRx.two : iRx.one;
+}
+function pr(iRx) {
+	return ["match: [" + st(iRx.current)+"]\n",
+	        "prev: [" + st(ot(iRx))+"]\n",
+			iRx.tracker.map(a => '<'+a[0]+'>').join("")];
+}
+
 
 describe("regexp incremental New", () => { 
 
@@ -258,8 +272,17 @@ describe("regexp incremental New", () => {
  		});
  		it("incrRegEx or /...\\b\\b../ succeed", () =>{
  			expect(incrRegEx !== undefined).to.be.true;
- 			var r =  incrRegEx("...\\b\\b..");
-			var res = [ r.matchStr('   ab') , r.state() ]
+ 			var r =  incrRegEx(/...\b\b../);
+/* 			console.log(pr(r));
+ 			r.matchStr("   ");
+ 			console.log(pr(r));	console.log(r.state().toString());console.log(pr(r));
+
+			var res = [ r.matchStr('a') , DONE ];
+			console.log(pr(r));
+			r.match('b');
+			console.log(pr(r));
+*/			
+			var res = [ r.matchStr('   ab') , DONE ];
  			expect(res).to.deep.equal([[true, 5,'   ab'],DONE]);
  			 			
  		});
@@ -270,14 +293,14 @@ describe("regexp incremental New", () => {
  			expect(res[0][0]).to.deep.equal(false);
  			 			
  		});
- 		it("Javascript /...\\b../ succeed", () =>{
+ 		it("incrRegEx /...\\b../ succeed", () =>{
  			expect(incrRegEx !== undefined).to.be.true;
  			var r =  /...\b../;
 			var res = r.test('   ab');
  			expect(res).to.equal(true);
  			 			
  		});
- 		it("Javascript or /...\\b../  should fail", () =>{
+ 		it("incrRegEx or /...\\b../  should fail", () =>{
  			expect(incrRegEx !== undefined).to.be.true;
  			var r =  /...\b../;
 			var res = r.test('  xab');

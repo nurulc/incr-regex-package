@@ -16,8 +16,11 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 import { expect} from "chai";
-import {DONE,MORE,MAYBE,FAILED,matchable,dot,or,zero_or_one,zero_or_more, RxParser, printExpr, printExprN} from '../regexp-parser';
-import { incrRegEx,RX                         } from "../incr-regex-v3";	
+//import {DONE,MORE,MAYBE,FAILED,matchable,dot,or,zero_or_one,zero_or_more, RxParser} from '../regexp-parser';
+import {RxParser} from '../regexp-parser';
+import {DONE,MORE,MAYBE,FAILED,matchable,dot,or,zero_or_one,zero_or_more} from '../rxtree';
+import { incrRegEx,RX                         } from "../incr-regex-v3";
+import {printExpr,printExprN} from "../rxprint";
 
 //import {describe} from "mocha";
 
