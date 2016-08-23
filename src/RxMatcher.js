@@ -19,7 +19,8 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 "use strict";
 import { assign, copy, extend                                                  } from "./utils";  
 import { incrRegEx,convertMask ,isMeta, isOptional,isHolder                    } from "./incr-regex-v3";  
-import {DONE,MORE,MAYBE,FAILED,/*matchable,dot,or,zero_or_one,zero_or_more, boundary, RxParser,*/ printExpr,printExprN} from './regexp-parser';
+
+
 
 
 

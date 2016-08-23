@@ -427,21 +427,22 @@ export class StackDedup {
     return this;
   }
 
-  push(v) {
-    if( v === undefined ) return this;
+  contains(v) {
     let data = this.data;
-    //console.log("TRY DEDUP",this.length);
     let len = this.length;
     for(let i=0; i<len; i++) {
        if(data[i] === v)  {
-        //console.log("DEDUP");
         return this;
       }
     }
-    data[this.length++] = v;
+  }
+
+  push(v) {
+    if( v === undefined ) return this;
+    if( this.contains(v) ) return this;
+    this.data[this.length++] = v;
     if( this.length > this.maxLen) this.maxLen = this.length;
     return this;
- 
   }
 
   pop() {
@@ -460,6 +461,10 @@ export class StackDedup {
     if(!list) return this;
     list.forEach( (a) => this.push(a) );
     return this;
+  }
+
+  clone() {
+    return this.map(a => a);
   }
 
 }

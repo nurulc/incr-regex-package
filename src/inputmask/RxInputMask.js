@@ -142,7 +142,7 @@ export class RXInputMask{
    
          // check if we are under an empty slot, then we can set the value there without moving anything
          if( zeroRange(selection) && aPattern.emptyAt(selection.start)) {
-            selection = selPlus(selection,1); ////newPattern.getFirstEditableAtOrAfter(selection.end+1);
+            selection = selPlus(selection,0,1); ////newPattern.getFirstEditableAtOrAfter(selection.end+1);
          }
          
          let newPattern = aPattern.clone();  // copy the current

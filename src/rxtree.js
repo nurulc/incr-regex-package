@@ -1,5 +1,5 @@
 //rxtree.js
-
+import {printExpr} from "./rxprint"; 
 
 export function MANY() {}
 export function TERM() { }
@@ -95,6 +95,9 @@ export function copyNode(aNode) {
 	throw new Error("Copy of an invalid node " + aNode);
 }
 
+
+// === SOME RegExp tree utils =====
+
 export function makeFSM(t, connector) {
   if( (matchable(t) || boundary(t)) && connector) { // t => t->connector
     t.nextNode = connector;
@@ -129,6 +132,163 @@ export function makeFSM(t, connector) {
 }
 
 
+
+export function  rxMatch(rxN, ch, lastCh, matchState = new StackDedup()) {
+    if(rxN === DONE ) {
+      if(ch === DONE) { 
+        matchState.push(DONE);
+        return DONE; 
+      }
+      return FAILED;
+    }
+    else if( dot(rxN) ) {
+      return rxMatch(rxN.left,ch, matchState);
+    }
+    else if( or(rxN) ) {
+          let rl =  rxMatch(rxN.left,ch, lastCh, matchState);
+          let rr =  rxMatch(rxN.right,ch,lastCh, matchState);
+          return _result(rl,rr);
+    }
+    else if(zero_or_one(rxN) || zero_or_more(rxN)) {
+          let rl =  boundary(rxN.left)? DONE : rxMatch(rxN.left,ch, lastCh, matchState);
+          let rr =  rxMatch(rxN.nextNode,ch, lastCh, matchState);
+          return _result(rl,rr);
+    }
+    else if( matchable(rxN) ) {
+       let res = rxN.match(ch);
+       if( res[0] ) {
+          matchState.push(rxN);
+        }
+       return res[0]? (rxN.nextNode === DONE? DONE:MORE) : FAILED; 
+    }
+    else if( boundary(rxN) ) {
+      //if( ch === DONE && this.nurul) console.log("boundary",ch)
+      if( ch === DONE) return  rxMatch(rxN.nextNode,ch,lastCh, matchState);// ignore the boundary
+    
+       let res = rxN.match(lastCh,ch);
+       if( res[0] || ch === undefined) {
+          return  rxMatch(rxN.nextNode,ch,lastCh, matchState);
+        }
+       return FAILED; 
+    }
+    return FAILED;
+  }
+
+
+function _result(l,r) {
+    if( l === FAILED ) return r;
+    if( l === MAYBE  ) return MAYBE;
+    if( l === MORE ) return (r === DONE || r === MAYBE)? MAYBE : MORE;
+    /*if( l === DONE )*/
+        return ( r === MORE || r === MAYBE) ? MAYBE : DONE;
+}
+
+export function rxMatchArr(ch, lastCh, currState, matchState) {
+      let res = FAILED;
+      matchState = (matchState === undefined || matchState !== currState) ? new StackDedup() : matchState;
+      res = currState.reduce( (res, rxN) => _result(rxMatch(rxN,lastCh,ch,matchState),res), res  );
+      if( res === FAILED  || matchState.length === 0) {
+        return undefined;
+      }
+      return matchState;    
+}
+
+
+export function rxNextState(currState) {
+	let len = currState.length;
+	let nextState = currState;
+	for(let i =0; i< len; i++) {
+		let rxN = currState.data[i];
+		currState.data[i] = rxN === DONE ? DONE : rxN.nextNode;
+	}
+	return nextState; // destructive change to the state
+}
+
+/*
+   Given a reg-expr node rxN, can we reach any element in the list rxN in one step.
+
+   This is the typical thing historians do, knowing what happens in the future can we 
+   find the decissions we made to get there. 
+   We get this issue whe we delete text, let me give a simple example:
+   regexp = /Phone: \d{3}-\d{3}-\d{4}|Pack: \d{3}:\d{7}/
+
+   So we can enter something like this
+     "Phone: 212-768-1234" or
+     "Pack: 789:7654321"
+
+     now suppose we entered: the second "Pack: 789:7654321"
+     now we delete the begining of the text:
+     "______________321", but we know that the begining should be fixed
+     so should be put "Phone: ___...", or "Pack: ___", this is the future problem.
+     
+     - We know that the text should end in "...321", so what can we tell about the past
+     so that we can reach here. Clearly come thing will be some thisgs unknown, but can we deduce
+     anything about the past (in out case the prefix string).
+     We know that the first letter must be a 'P'
+     "P_____________321" so what are out outions
+     "Phone: ___-___-"  clearly this is not goin to fit sinece we need a '-' where the '3' has to be
+     but:
+     "Pack: ___:____"   This case clearly fits. This is a simple exmaple, and a regexp can get very complicated
+
+     This a an attempt to do the best filling details uning the principle of least surprise, but also allow the user
+     to edit the input in any legal way without haveing to deleting everything and starting again
+
+
+     Params:
+     	rxN - node in a regexp FSM (finite state machine)
+     	rxTargetStateList - the target state we need to reach
+*/
+
+function rxCanReach(rxN, rxTargetStateList) {
+	if( rxN === DONE ) return false;
+    else if( dot(rxN) ) {
+      return rxCanReach(rxN.left,rxTargetStateList);
+    }
+    else if( or(rxN) ) {
+          return  (rxCanReach(rxN.left,rxTargetStateList) ||
+                  rxCanReach(rxN.right,rxTargetStateList);
+    }
+    else if(zero_or_one(rxN) || zero_or_more(rxN)) {
+          return   rxCanReach(rxN.left,rxTargetStateList) ||
+                   rxCanReach(rxN.nextNode,rxTargetStateList);
+    }
+    else if( boundary(rxN) ) {
+      return  rxCanReach(rxN.nextNode,rxTargetStateList); // ignore the boundary
+    }
+    else if( matchable(rxN) ) {
+       if( matchable(rxN.nextNode) ) {
+       	   if( rxTargetStateList.contains(rxN.nextNode) )  return rxN;
+       	   return undefined;
+       }	
+       return rxCanReach(rxn.nextNode,rxTargetStateList);
+    }
+    return undefined;
+}
+
+/*
+
+	Given an initial set of possible states, which of those acutually get to the targer state.
+	this is the way we determine form a known future state of a regexp match, we can recreate the 
+	previous states we could have been in. This is to determine that fixed value that must occur in the 
+	previous states
+
+*/
+
+function rxGetActualStartState(possibleStartState, targetState) {
+   return possibleStartState.map(   (rxN) => rxCanReach(rxN, targetState))
+                            .filter( a    => a !== undefined);
+}
+
+
+function advancedRxMatcher(rxN,str) {
+	let state = rxMatch(rxN, str.charAt(0));
+	str.substr(1).split('').reduce( ([lastCh, state, res], c) => {
+		  let nextState = rxMatchArr(rxNextState(state), c,lastCh,
+	}, [str.charAt(0), state, [state.clone()]])
+
+}
+
+
 export const RXTREE = { MANY, TERM, PERHAPS_MORE, BOUNDARY, matchable,boundary,dot,or,zero_or_one,zero_or_more,anychar,charset,OP,
                         SKIP, BS, LP, RP, OR,  ZERO_OR_ONE, ZERO_OR_MORE, ONE_OR_MORE, DOT, FALSE, 
-                        RX_OP, RX_UNARY, RX_CONS,RX_OR, RX_ZERO_OR_ONE,RX_ZERO_OR_MORE, RX_ONE_OR_MORE,copyNode, stdRxMeta, makeCharSet, makeFSM };
+                        RX_OP, RX_UNARY, RX_CONS,RX_OR, RX_ZERO_OR_ONE,RX_ZERO_OR_MORE, RX_ONE_OR_MORE,copyNode, stdRxMeta, makeCharSet, makeFSM, rxMatchArr, rxNextState, rxMatch };

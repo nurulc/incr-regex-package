@@ -68,11 +68,11 @@ export function convertMask(s) {
 }
 
 export function isMeta(ch) {
-  return ch == HOLDER_ANY || isOptional(ch);
+  return ch === HOLDER_ANY || isOptional(ch);
 }
 
 export function isOptional(ch) {
- return  ch == HOLDER_ZERO_OR_ONE || ch == HOLDER_ZERO_OR_MORE ;
+ return  ch === HOLDER_ZERO_OR_ONE || ch === HOLDER_ZERO_OR_MORE ;
 }
 
 export function isHolder(ch) { return ch === HOLDER_ANY; }
@@ -180,7 +180,9 @@ export function makeRxInfo(unit, addElem, merge, optional, mapper) {
   function getRxInfo(rxNode,prefix, optStop) {
 
     if( !rxNode ) return unit(prefix);
-    if( optStop && rxNode === n_head(optStop) ) 
+    if( optStop && rxNode === n_head(optStop) )  { // if we should match stop node, then pop the stop node 
+                                                   // (usually its because we found a loop). Remove the node from the stack {n_tail(optStrop)},
+                                                   // and procees with the next element 
       return getRxInfo(rxNode.nextNode,addOpt(rxNode, prefix),n_tail(optStop));
     
     if(rxNode === DONE ) return unit(prefix);
@@ -253,10 +255,14 @@ const arrayMaskListBuilder = ( (mapper,useopt) => {
    const addElem = (a,b) => a+b;
    const merge = (a,b) => flatten([a,b]);
    const aMerge = (a,b) => flatten(arr_push(a,b));
-   const optfn = (rxn, prefix, getRxInfo, optStop) => {
+   const optfn = (rxn, prefix, getRxInfo, optStop) => { // interesting function, to deal with loops/optional
     if( rxn.left ) {
         let ll =   getRxInfo(rxn.nextNode,prefix,optStop);
-        let rr =  getRxInfo(rxn.left,prefix, n_cons(rxn,optStop));
+        let rr =  getRxInfo(rxn.left,prefix, 
+                              zero_or_more(rxn)?
+                                  n_cons(rxn,optStop):            // this is the optional part that could loop, push rxn (rx node) on the stack
+                                                                  //   if we cone back to this node and find rxn of the stack, do not loop again                 
+                                  optStop);                       // Non-looping optional      
         return merge(ll,rr);
     }
    }
