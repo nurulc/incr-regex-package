@@ -183,26 +183,29 @@ function _result(l,r) {
         return ( r === MORE || r === MAYBE) ? MAYBE : DONE;
 }
 
+// Resturns a list of nodes that Match currState
+
 export function rxMatchArr(ch, lastCh, currState, matchState) {
-      let res = FAILED;
       matchState = (matchState === undefined || matchState !== currState) ? new StackDedup() : matchState;
-      res = currState.reduce( (res, rxN) => _result(rxMatch(rxN,lastCh,ch,matchState),res), res  );
+      let res = currState.reduce( (res, rxN) => _result(rxMatch(rxN,lastCh,ch,matchState),res), FAILED  );
       if( res === FAILED  || matchState.length === 0) {
         return undefined;
       }
       return matchState;    
 }
 
+// immutable function that takes the currentState and generates the next state
 
 export function rxNextState(currState) {
 	let len = currState.length;
-	let nextState = currState;
+	let nextState = new StackDedup();
 	for(let i =0; i< len; i++) {
 		let rxN = currState.data[i];
-		currState.data[i] = rxN === DONE ? DONE : rxN.nextNode;
+		nextState.push(rxN === DONE ? DONE : rxN.nextNode);
 	}
 	return nextState; // destructive change to the state
 }
+
 
 /*
    Given a reg-expr node rxN, can we reach any element in the list rxN in one step.
@@ -246,7 +249,7 @@ function rxCanReach(rxN, rxTargetStateList) {
     }
     else if( or(rxN) ) {
           return  (rxCanReach(rxN.left,rxTargetStateList) ||
-                  rxCanReach(rxN.right,rxTargetStateList);
+                   rxCanReach(rxN.right,rxTargetStateList));
     }
     else if(zero_or_one(rxN) || zero_or_more(rxN)) {
           return   rxCanReach(rxN.left,rxTargetStateList) ||
@@ -274,18 +277,30 @@ function rxCanReach(rxN, rxTargetStateList) {
 
 */
 
-function rxGetActualStartState(possibleStartState, targetState) {
+export function rxGetActualStartState(possibleStartState, targetState) {
    return possibleStartState.map(   (rxN) => rxCanReach(rxN, targetState))
                             .filter( a    => a !== undefined);
 }
 
 
-function advancedRxMatcher(rxN,str) {
-	let state = rxMatch(rxN, str.charAt(0));
-	str.substr(1).split('').reduce( ([lastCh, state, res], c) => {
-		  let nextState = rxMatchArr(rxNextState(state), c,lastCh,
-	}, [str.charAt(0), state, [state.clone()]])
 
+function rxStepArr(lastCh,c, currState) {
+	let nextState = undefined;
+	if( currState != undefined) {
+		let forward = rxNextState(currState);
+		nextState = rxMatchArr(forward, c,lastCh);
+	}
+	return nextState;
+}
+
+
+function advancedRxMatcher(rxN,str) {
+	let state0 = rxMatch(rxN, str.charAt(0));
+	return str.substr(1).split('').reduce( ([lastCh, currState, res], c) => {
+		   let nextState = rxStepArr(lastCh,c,currState);
+           res.push(nextState);
+		   return [c, nextState, res ]
+	}, [str.charAt(0), state0, [state0]]);
 }
 
 

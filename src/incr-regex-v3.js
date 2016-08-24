@@ -184,7 +184,7 @@ export function makeRxInfo(unit, addElem, merge, optional, mapper) {
                                                    // (usually its because we found a loop). Remove the node from the stack {n_tail(optStrop)},
                                                    // and procees with the next element 
       return getRxInfo(rxNode.nextNode,addOpt(rxNode, prefix),n_tail(optStop));
-    
+    }
     if(rxNode === DONE ) return unit(prefix);
     if( dot(rxNode) ) { // this is a node that concat of two regexp /AB/ => dot(A,B) - where A and B are regexp themselves
       //console.log("getMaskListOLD-dot");
