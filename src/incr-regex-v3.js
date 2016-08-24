@@ -23,7 +23,7 @@ import {ID, makeRegexp, parseMulti, odd, gtPrec,sprefix,rprefix,shead,stail,sRig
         n_removeAll, flatten,arr_push , arr_uniq } from "./utils";
 
 
-import { matchable,boundary,dot,or,zero_or_one,zero_or_more, DONE, FAILED, MORE, MAYBE,makeFSM} from "./rxtree";
+import { matchable,boundary,dot,or,zero_or_one,zero_or_more, DONE, FAILED, MORE, MAYBE,makeFSM, getArrayFixedAt} from "./rxtree";
 
 // matchable, boundary,
 import {RxParser} from './regexp-parser';
@@ -284,32 +284,6 @@ const getArrayMask = (() => {
      return (rx) => cleanMask(fn(rx,''))
    }
   )();
-
-
-function fixedAt(rxNode) {
-
-  if( !rxNode || rxNode === DONE) return undefined;
-  if( dot(rxNode) ) { // this is a node that concat of two regexp /AB/ => dot(A,B) - where A and B are regexp themselves
-    return fixedAt(rxNode.left);
-  } else if( matchable(rxNode) ) {
-      let res = matchable(rxNode)(undefined);
-      return res[1]; // undefined if this is not a fixed character
-  } else if( or(rxNode) ) { //  /A|B/ => or(A,B)
-      let chL = fixedAt(rxNode.left);
-      let chR = fixedAt(rxNode.right);
-      return  (chL === chR ) ? chL : undefined; // only true if the same char begins bot portions of the OR ( left | right )
-  }
-  else if(zero_or_one(rxNode) || zero_or_more(rxNode) || boundary(rxNode)) { 
-      return undefined; 
-  }
-  
-  return undefined;
-}
-function getArrayFixedAt(arr) {
-  let c = arr && arr.length >0 ? fixedAt(arr.data[0]) : undefined;
-  if( c === undefined ) return undefined;
-  return  (arr).reduce((a,b) => (a === fixedAt(b))?a:undefined, c);
-}
 
 function combine(a,b) { return (a === -1 || b === -1)? -1 : a+b; }
 

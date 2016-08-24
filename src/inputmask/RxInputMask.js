@@ -27,7 +27,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 import { assign, copy, extend , arr_find                                       } from "../utils";  
 import { incrRegEx,convertMask ,isMeta, isOptional,isHolder                    } from "../incr-regex-v3";
 import { RxMatcher                    } from "../RxMatcher";  
-import {DONE,MORE,MAYBE,FAILED}         from '../regexp-parser';
+//import {DONE,MORE,MAYBE,FAILED}         from '../rxtree';
 import {printExpr,printExprN,printExprQ} from "../rxprint";
 
 function has(object, key) {

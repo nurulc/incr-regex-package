@@ -2,6 +2,7 @@
 const repl = require('repl');
 var msg = 'message';
 var rx = require("./lib/index");
+var utils = require("./lib/utils");
 
 //Create node repl
 var c = repl.start('> ').context;
@@ -52,12 +53,27 @@ c.help = function(containsStr) {
   }
   console.log("avaliable variables: "+ s);
 }
-c.incrRegEx= c.rx.incrRegEx;
-c.printExpr= c.rx.printExpr;
+
+c.StackDedup = utils.StackDedup;
+c.utils = utils;
 c.RX= c.rx.RxParser;
 c.p = new c.RX();
 c.RXInputMask = c.rx.RXInputMask;
 c.RxMatcher = c.rx.RxMatcher;
+
+c.MANY = rx.MANY; c.TERM = rx.TERM; c.PERHAPS_MORE = rx.PERHAPS_MORE; c.BOUNDARY = rx.BOUNDARY; c.matchable = rx.matchable;
+c.boundary = rx.boundary; c.dot = rx.dot; c.or = rx.or; c.zero_or_one = rx.zero_or_one; c.zero_or_more = rx.zero_or_more;
+c.anychar = rx.anychar; c.charset = rx.charset; c.OP = rx.OP; c.SKIP = rx.SKIP; c.BS = rx.BS; c.LP = rx.LP; c.RP = rx.RP;
+c.OR = rx.OR; c.ZERO_OR_ONE = rx.ZERO_OR_ONE; c.ZERO_OR_MORE = rx.ZERO_OR_MORE; c.ONE_OR_MORE = rx.ONE_OR_MORE; c.DOT = rx.DOT;
+c.FALSE = rx.FALSE; c.DONE = rx.DONE; c.MAYBE = rx.MAYBE; c.MORE = rx.MORE; c.FAILED = rx.FAILED; c.RX_OP = rx.RX_OP;
+c.RX_UNARY = rx.RX_UNARY; c.RX_CONS = rx.RX_CONS; c.RX_OR = rx.RX_OR; c.RX_ZERO_OR_ONE = rx.RX_ZERO_OR_ONE; 
+c.RX_ZERO_OR_MORE = rx.RX_ZERO_OR_MORE; c.RX_ONE_OR_MORE = rx.RX_ONE_OR_MORE; c.copyNode = rx.copyNode; c.stdRxMeta = rx.stdRxMeta;
+c.makeCharSet = rx.makeCharSet; c.makeFSM = rx.makeFSM; c.rxMatchArr = rx.rxMatchArr; c.rxNextState = rx.rxNextState;
+c.rxMatch = rx.rxMatch; c.rxCanReach = rx.rxCanReach; c.rxGetActualStartState = rx.rxGetActualStartState; 
+c.advancedRxMatcher = rx.advancedRxMatcher; c.incrRegEx = rx.incrRegEx; c.printExpr = rx.printExpr; c.printExprS = rx.printExprS;
+c.RxParser = rx.RxParser; c.RXInputMask = rx.RXInputMask; c.contract = rx.contract; c.RxMatcher = rx.RxMatcher;
+c.matchable = rx.matchable; c.dot = rx.dot; c.or = rx.or; c.zero_or_one = rx.zero_or_one; c.zero_or_more = rx.zero_or_more;
+c.IREGEX = rx.IREGEX; c.convertMask = rx.convertMask; c.isMeta = rx.isMeta; c.isOptional = rx.isOptional; c.isHolder = rx.isHolder;
 
  c.insx = function (rxi) {  
     return function(str) {
@@ -67,7 +83,7 @@ c.RxMatcher = c.rx.RxMatcher;
           };
   };
 
-c.emailStr = "[a-zA-Z0-9_.-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]{2,})*(\\.[a-zA-Z0-9_-]{2,8})";
+c.emailStr = "Mail: [a-zA-Z0-9_.-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]{2,})*(\\.[a-zA-Z0-9_-]{2,8})|ssn: \\d{3}-\\d{2}-\\d{4}|Phone: (\\+\\d{1,3})? \\(\\d{3}\\)-\\d{3}-\\d{4}";
 c.email = c.incrRegEx(c.emailStr);
 
 c.anRx = c.incrRegEx(/aa[a-zA-Z]+@@\d+!!/); // create an incremental matcher for regex.

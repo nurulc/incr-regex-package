@@ -16,7 +16,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 */
 "use strict";
-import { DONE,dot } from './rxtree';
+import { DONE,dot,matchable } from './rxtree';
 
 export function printExpr(exp,paren) {
   if( paren && exp && exp.oper) return "(" + printExpr(exp) + ")";
@@ -27,6 +27,24 @@ export function printExpr(exp,paren) {
     }
     else if( exp.oper.type == 'U' ) {
       return "("+printExpr(exp.left,false)+  exp.oper.val + ")";
+    }
+  }
+  else if( exp === DONE) return "<DONE>";
+  else return exp.val;
+}
+
+export function printExprS(exp,ctxPriority) {
+  if(exp && exp.oper ) {
+    if( exp.oper.type == 'B' ) {
+      if(exp.oper.op == '.') 
+      	return ctxPriority > 2 ? "(" + printExprS(exp.left,2) + printExprS(exp.right,2) +")":
+                               printExprS(exp.left,2) + printExprS(exp.right,2);
+        return ctxPriority > 1 ?"(" + printExprS(exp.left,1) + "|" + printExprS(exp.right,1) + ")":
+      					  printExprS(exp.left,ctxPriority+1) + "|" + printExprS(exp.right,ctxPriority)
+    }
+    else if( exp.oper.type == 'U' ) {
+      return ctxPriority > 3  ? "(" + printExprS(exp.left,1)+ ")" + exp.oper.val:
+      							  printExprS(exp.left,3)+  exp.oper.val;
     }
   }
   else if( exp === DONE) return "<DONE>";

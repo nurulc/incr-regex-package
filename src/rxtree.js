@@ -1,6 +1,6 @@
 //rxtree.js
 import {printExpr} from "./rxprint"; 
-
+import {StackDedup} from "./utils";
 export function MANY() {}
 export function TERM() { }
 export function PERHAPS_MORE(){ }
@@ -131,7 +131,31 @@ export function makeFSM(t, connector) {
   return t;
 }
 
+function fixedAt(rxNode) {
 
+  if( !rxNode || rxNode === DONE) return undefined;
+  if( dot(rxNode) ) { // this is a node that concat of two regexp /AB/ => dot(A,B) - where A and B are regexp themselves
+    return fixedAt(rxNode.left);
+  } else if( matchable(rxNode) ) {
+      let res = matchable(rxNode)(undefined);
+      return res[1]; // undefined if this is not a fixed character
+  } else if( or(rxNode) ) { //  /A|B/ => or(A,B)
+      let chL = fixedAt(rxNode.left);
+      let chR = fixedAt(rxNode.right);
+      return  (chL === chR ) ? chL : undefined; // only true if the same char begins bot portions of the OR ( left | right )
+  }
+  else if(zero_or_one(rxNode) || zero_or_more(rxNode) || boundary(rxNode)) { 
+      return undefined; 
+  }
+  
+  return undefined;
+}
+
+export function getArrayFixedAt(arr) {
+  let c = arr && arr.length >0 ? fixedAt(arr.data[0]) : undefined;
+  if( c === undefined ) return undefined;
+  return  (arr).reduce((a,b) => (a === fixedAt(b))?a:undefined, c);
+}
 
 export function  rxMatch(rxN, ch, lastCh, matchState = new StackDedup()) {
     if(rxN === DONE ) {
@@ -142,7 +166,7 @@ export function  rxMatch(rxN, ch, lastCh, matchState = new StackDedup()) {
       return FAILED;
     }
     else if( dot(rxN) ) {
-      return rxMatch(rxN.left,ch, matchState);
+      return rxMatch(rxN.left,ch, lastCh, matchState);
     }
     else if( or(rxN) ) {
           let rl =  rxMatch(rxN.left,ch, lastCh, matchState);
@@ -294,8 +318,10 @@ function rxStepArr(lastCh,c, currState) {
 }
 
 
-function advancedRxMatcher(rxN,str) {
-	let state0 = rxMatch(rxN, str.charAt(0));
+export function advancedRxMatcher(rxN,str) {
+	let state0 = new StackDedup(); 
+	let res = rxMatch(rxN, str.charAt(0),state0);
+	if(res === FAILED ) return [undefined, undefined, [state0]];
 	return str.substr(1).split('').reduce( ([lastCh, currState, res], c) => {
 		   let nextState = rxStepArr(lastCh,c,currState);
            res.push(nextState);
@@ -305,5 +331,7 @@ function advancedRxMatcher(rxN,str) {
 
 
 export const RXTREE = { MANY, TERM, PERHAPS_MORE, BOUNDARY, matchable,boundary,dot,or,zero_or_one,zero_or_more,anychar,charset,OP,
-                        SKIP, BS, LP, RP, OR,  ZERO_OR_ONE, ZERO_OR_MORE, ONE_OR_MORE, DOT, FALSE, 
-                        RX_OP, RX_UNARY, RX_CONS,RX_OR, RX_ZERO_OR_ONE,RX_ZERO_OR_MORE, RX_ONE_OR_MORE,copyNode, stdRxMeta, makeCharSet, makeFSM, rxMatchArr, rxNextState, rxMatch };
+                        SKIP, BS, LP, RP, OR,  ZERO_OR_ONE, ZERO_OR_MORE, ONE_OR_MORE, DOT, FALSE, DONE, MAYBE, MORE, FAILED,
+                        RX_OP, RX_UNARY, RX_CONS,RX_OR, RX_ZERO_OR_ONE,RX_ZERO_OR_MORE, RX_ONE_OR_MORE,copyNode, stdRxMeta, 
+                        makeCharSet, makeFSM, getArrayFixedAt, rxMatchArr, rxNextState, rxMatch,
+                        rxCanReach, rxGetActualStartState, advancedRxMatcher};
