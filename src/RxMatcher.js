@@ -22,7 +22,14 @@ import { incrRegEx,convertMask ,isMeta, isOptional,isHolder                    }
 import {DONE,MORE,MAYBE,FAILED}                                                  from './rxtree';
 
 
-
+function _fixTracker(tracker,i) {
+  let elem = tracker[i];
+  if(elem[1] !== undefined && elem[0] !== elem[1]) {
+    elem[0] = elem[1];
+    //console.log(`fixTracker: set Value at: ${i} to '${elem[1]}'`)
+  }
+  //else console.log(`fixTracker: no action at: ${i} val: '${elem[0]}'  state:'${elem[1]}'`)
+}
 
 export class RxMatcher {
 	constructor(matcher) {
@@ -36,6 +43,7 @@ export class RxMatcher {
 		let tracker = this.getInputTracker();
 		for(;i < tracker.length; i++) 
       if(tracker[i][1] === undefined) return i;
+      else _fixTracker(tracker,i); // make sure we fixup the value of fixed values
 
 		let m = this.minChars();
 		i = tracker.length;
@@ -44,10 +52,21 @@ export class RxMatcher {
 		return i;    
   	}
 
+  // we we find a position that has aholder, but should be a fixed characted
+  // convert the older to a fixed character
+  fixTracker() {
+    let tracker = this.getInputTracker();
+    for(var i=0; i < tracker.length; i++) {
+      _fixTracker(tracker,i);
+    }
+  }  
+
 	getFirstEditableAtOrBefore(ix) {
 		let tracker = this.getInputTracker();
 		if( ix >= tracker.length ) ix = tracker.length-1;
-		for(; ix>0;ix--) if( tracker[ix][1] === undefined ) return ix;
+		for(; ix>0;ix--) 
+      if( tracker[ix][1] === undefined ) return ix;
+      else _fixTracker(tracker,ix);
 		return 0;  
 	}
 
@@ -55,6 +74,22 @@ export class RxMatcher {
   	return this.matcher.getInputLength();
   }
 
+  /*
+     This code will use back propogation, that given input, for example
+
+      input: xxx______________yyy
+      patter: p
+      fill in the unknows, kind of algebra problem
+      suppose p = /xxx\d.*fred\d{9}yyy|xxx.joy.*zzz/
+      input must be: xxx_fred_________yyy
+      nothing else will fit.
+      This is a tricky problem, I am not confident i have a provably
+      correct algorithm for this to handle all edge cases, but the
+      back propogation method will handle most cases
+  */
+  updateFixed(start,end) {
+    //console.log(`updateFixed: ${start}, ${end} not yet implemented`);
+  }
 
   setPos(ix) {
      //let currTracker = this.tracker.slice(0); // copy the array
@@ -134,13 +169,17 @@ export class RxMatcher {
 
   match(ch) { /* public */
   	 this._resetCache();
-  	 return this.matcher.match(ch);
+  	 let ret = this.matcher.match(ch);
+     this.fixTracker();
+     return ret;
   }
 
 
   matchStr(str) { /* public */
   	this._resetCache();
-  	return this.matcher.matchStr(str);
+  	let ret = this.matcher.matchStr(str);
+    this.fixTracker();
+    return ret;
   }
 
   state() { /* public */

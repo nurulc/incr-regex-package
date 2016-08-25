@@ -146,12 +146,14 @@ export class RXInputMask{
          }
          
          let newPattern = aPattern.clone();  // copy the current
+         let {start: startPos, end: endPos} = selection;
          selection = this._updateSelection(selection, newPattern.getFirstEditableAtOrAfter(selection.start)); // start from the first editable position
-         let endPos = newPattern.getFirstEditableAtOrAfter(selection.end);
+         endPos = newPattern.getFirstEditableAtOrAfter(selection.end);
+         newPattern.updateFixed(startPos,endPos); // make sure all the fixed values are set
          let textAfterSelection = _after(newPattern,false,endPos); // get the raw value
          let inputIndex = selection.start;
          newPattern.setPos(inputIndex);
-         
+         newPattern.fixTracker();
          if( ch !== undefined && !_skipAndMatch(newPattern,ch) ) { // but first make sure we did not enter a fixed character 
                return [false, selection,newPattern];
          }
@@ -163,7 +165,7 @@ export class RXInputMask{
 
          let resultPattern = this._insertRest(textAfterSelection, newPattern, inputIndex,endPos+1);
          _fillInFixedValuesAtEnd(resultPattern || newPattern);
-         
+         resultPattern.fixTracker();
          // Advance the cursor to the next character
          return [true, newSel(newPos,newPos),resultPattern || newPattern];
   }
@@ -231,7 +233,7 @@ export class RXInputMask{
     this.pattern = result[2];
     this.selection.start = this.selection.end = start;
     //console.log("Before:", selectionBefore, " After:",this.selection);
-    
+    this.pattern.fixTracker();
     // History
     if (this._historyIndex !== null) {
       // Took more input after undoing, so blow any subsequent history away

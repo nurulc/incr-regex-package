@@ -285,7 +285,7 @@ const getArrayMask = (() => {
    }
   )();
 
-function combine(a,b) { return (a === -1 || b === -1)? -1 : a+b; }
+  function combine(a,b) { return (a === -1 || b === -1)? -1 : a+b; }
 
 function fixedSizePattern(rxNode) {
  if( !rxNode ) return 0;
