@@ -1,5 +1,5 @@
 //rxtree.js
-import {printExpr} from "./rxprint"; 
+//import {printExpr} from "./rxprint"; 
 import {StackDedup} from "./utils";
 export function MANY() {}
 export function TERM() { }
@@ -94,7 +94,23 @@ export function copyNode(aNode) {
 	}
 	throw new Error("Copy of an invalid node " + aNode);
 }
+//
 
+//========== CODE TO CHECK MINIMUM NUMBER of characters that must be input to finish the RegEx
+//const HOLDER_ZERO_OR_MORE = '*';//"\u20e4" "\u2733" "\u2026";
+//const HOLDER_ANY = '_';//"\u2581";
+//const HOLDER_ZERO_OR_ONE = "?";//  "\u21a0"
+
+export const HOLDER_ZERO_OR_MORE = "\u22ef";// "\u26b9"; //"\u20e4" ;
+export const HOLDER_ANY = "\uff3f"; //"\u268a";//"\u05b7";//"\u035f"; ////"\u2581"; //"\u0332"; //"\u268a"; //
+export const HOLDER_ZERO_OR_ONE = "\u25d1"; //"\u21a0";
+
+/*
+const HOLDER_ZERO_OR_MORE = "*";
+const HOLDER_ANY = "_";
+const HOLDER_ZERO_OR_ONE = "?"
+
+*/
 
 // === SOME RegExp tree utils =====
 
@@ -147,7 +163,6 @@ function fixedAt(rxNode) {
   else if(zero_or_one(rxNode) || zero_or_more(rxNode) || boundary(rxNode)) { 
       return undefined; 
   }
-  
   return undefined;
 }
 
@@ -209,9 +224,9 @@ function _result(l,r) {
 
 // Resturns a list of nodes that Match currState
 
-export function rxMatchArr(ch, lastCh, currState, matchState) {
+export function rxMatchArr(  ch, lastCh,  currState, matchState) {
       matchState = (matchState === undefined || matchState !== currState) ? new StackDedup() : matchState;
-      let res = currState.reduce( (res, rxN) => _result(rxMatch(rxN,lastCh,ch,matchState),res), FAILED  );
+      let res = currState.reduce( (res, rxN) => _result(rxMatch(rxN,ch,lastCh,matchState),res), FAILED  );
       if( res === FAILED  || matchState.length === 0) {
         return undefined;
       }
@@ -266,30 +281,45 @@ export function rxNextState(currState) {
      	rxTargetStateList - the target state we need to reach
 */
 
-function rxCanReach(rxN, rxTargetStateList) {
-	if( rxN === DONE ) return false;
+function rxCanReach(rxN, rxTargetStateList,stop) {
+	if( rxN === stop ) return undefined;
+	if( rxN === DONE ) return undefined;
     else if( dot(rxN) ) {
-      return rxCanReach(rxN.left,rxTargetStateList);
+      return rxCanReach(rxN.left,rxTargetStateList,stop);
     }
     else if( or(rxN) ) {
-          return  (rxCanReach(rxN.left,rxTargetStateList) ||
-                   rxCanReach(rxN.right,rxTargetStateList));
+          return  (rxCanReach(rxN.left,rxTargetStateList,stop) ||
+                   rxCanReach(rxN.right,rxTargetStateList,stop));
     }
     else if(zero_or_one(rxN) || zero_or_more(rxN)) {
-          return   rxCanReach(rxN.left,rxTargetStateList) ||
-                   rxCanReach(rxN.nextNode,rxTargetStateList);
+          return   rxCanReach(rxN.left,rxTargetStateList,rxN) ||
+                   rxCanReach(rxN.nextNode,rxTargetStateList,stop);
     }
     else if( boundary(rxN) ) {
-      return  rxCanReach(rxN.nextNode,rxTargetStateList); // ignore the boundary
+      return  rxCanReach(rxN.nextNode,rxTargetStateList,stop); // ignore the boundary
     }
     else if( matchable(rxN) ) {
-       if( matchable(rxN.nextNode) ) {
+       if(rxTargetStateList.contains(rxN)) return rxN	
+      /* if( matchable(rxN.nextNode) ) {
        	   if( rxTargetStateList.contains(rxN.nextNode) )  return rxN;
        	   return undefined;
-       }	
-       return rxCanReach(rxn.nextNode,rxTargetStateList);
+       } */	
+       return rxCanReach(rxN.nextNode,rxTargetStateList,stop);
     }
     return undefined;
+}
+
+export function computeReachableList(arrIn) {
+	if( arrIn === undefined || arrIn.length < 2 ) return arrIn;
+	let arr = arrIn.map( ([[m,pm],c]) => [[m,pm],c]);
+	for(let i = arr.length-2; i>= 0; i--) {
+		let [[match0, possibleMatch0], c0] = arr[i];
+		let [[match1, possibleMatch1], c1] = arr[i+1];
+		let result0 = match0.filter( v => rxCanReach(v,match1) );
+		let cr = getArrayFixedAt(result0) || c0;
+		arr[i] = [[result0, possibleMatch0], cr];
+	}
+	return arr;
 }
 
 /*
@@ -308,30 +338,59 @@ export function rxGetActualStartState(possibleStartState, targetState) {
 
 
 
-function rxStepArr(lastCh,c, currState) {
-	let nextState = undefined;
-	if( currState != undefined) {
-		let forward = rxNextState(currState);
-		nextState = rxMatchArr(forward, c,lastCh);
-	}
-	return nextState;
+export function rxStepArr(c,lastCh, currState) {
+	if( currState === undefined)  return undefined;
+	
+	let possibleStates = rxNextState(currState);
+	let matchingStates = rxMatchArr((c===HOLDER_ANY?undefined:c),lastCh,possibleStates); //rxMatchArr(ch, lastCh, currState, matchState)
+	return matchingStates !== undefined? [matchingStates, possibleStates] : undefined;
 }
 
+
+function advancedRxMatcherOLD(rxN,str) {
+	let state0 = new StackDedup(rxN); 
+	let firstCh =  str.charAt(0);
+	let res = rxMatch(rxN,firstCh,undefined,state0);
+	if(res === FAILED ) return [false, undefined, undefined, []];
+
+	return str.substr(1).split('').reduce( ([isOk, lastCh, currState, res], c) => {
+		   let nextState = undefined;
+		   if( isOk ) {
+		   	  nextState = rxStepArr(c,lastCh,currState);
+		   	  // do we need to perform case conversion here? 
+		   	  // i.e. switch the case if c is alphabetic
+		   }  
+		   
+           if( nextState !== undefined) {
+           	  res.push([nextState,c]);
+           	  return [true, c, nextState, res ];
+           }	  
+		   return [false,lastCh, currState, res]
+	}, [true,firstCh, state0, [ [state0,firstCh] ] ]);
+}
 
 export function advancedRxMatcher(rxN,str) {
-	let state0 = new StackDedup(); 
-	let res = rxMatch(rxN, str.charAt(0),state0);
-	if(res === FAILED ) return [undefined, undefined, [state0]];
-	return str.substr(1).split('').reduce( ([lastCh, currState, res], c) => {
-		   let nextState = rxStepArr(lastCh,c,currState);
-           res.push(nextState);
-		   return [c, nextState, res ]
-	}, [str.charAt(0), state0, [state0]]);
+	let startNode = {}; startNode.nextNode = rxN; // fake head node, we need to do this because the first 
+	                                           // action is to move evrything to next state
+	return str.split('').reduce( ([isOk, lastCh, currState, res], c) => {
+		   let nextState = undefined;
+		   if( isOk ) {
+		   	  nextState = rxStepArr(c,lastCh,currState);
+		   	  // do we need to perform case conversion here? 
+		   	  // i.e. switch the case if c is alphabetic
+		   }  
+		   
+           if( nextState !== undefined) {
+           	  res.push([nextState,c]);
+           	  return [true, c, nextState[0], res ];
+           }	  
+		   return [false,lastCh, currState, res]
+	}, [true,undefined, new StackDedup(startNode), [] ]);
 }
-
 
 export const RXTREE = { MANY, TERM, PERHAPS_MORE, BOUNDARY, matchable,boundary,dot,or,zero_or_one,zero_or_more,anychar,charset,OP,
                         SKIP, BS, LP, RP, OR,  ZERO_OR_ONE, ZERO_OR_MORE, ONE_OR_MORE, DOT, FALSE, DONE, MAYBE, MORE, FAILED,
                         RX_OP, RX_UNARY, RX_CONS,RX_OR, RX_ZERO_OR_ONE,RX_ZERO_OR_MORE, RX_ONE_OR_MORE,copyNode, stdRxMeta, 
-                        makeCharSet, makeFSM, getArrayFixedAt, rxMatchArr, rxNextState, rxMatch,
-                        rxCanReach, rxGetActualStartState, advancedRxMatcher};
+                        makeCharSet, makeFSM, getArrayFixedAt, rxMatchArr, rxNextState, rxMatch, rxStepArr,
+                        rxCanReach, rxGetActualStartState, advancedRxMatcher, HOLDER_ZERO_OR_MORE, HOLDER_ANY, HOLDER_ZERO_OR_ONE
+                    };

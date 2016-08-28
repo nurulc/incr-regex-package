@@ -435,6 +435,7 @@ export class StackDedup {
         return this;
       }
     }
+    return undefined;
   }
 
   push(v) {

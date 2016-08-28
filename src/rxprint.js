@@ -48,7 +48,7 @@ export function printExprS(exp,ctxPriority) {
     }
   }
   else if( exp === DONE) return "<DONE>";
-  else return exp.val;
+  else return (exp.val||'~~~');
 }
 
 export function printExprQ(exp,paren) {
@@ -63,7 +63,7 @@ export function printExprQ(exp,paren) {
     }
   }
   else if( exp === DONE) return "<DONE>";
-  else return "'"+exp.val+"'";
+  else return "'"+(exp.val||'~~~')+"'";
 }
 
 export function printExprN(exp,paren) {
@@ -86,7 +86,7 @@ export function printExprN(exp,paren) {
   }
   else if( exp === DONE) return "<DONE>";
   else {
-    if( exp && exp.nextNode ) return "("+exp.val + "." +printExprN(exp.nextNode)+")";
+    if( exp && exp.nextNode ) return "("+(exp.val||'~~~') + "." +printExprN(exp.nextNode)+")";
     return exp ? exp.val: '';
   }
 }

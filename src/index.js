@@ -21,7 +21,8 @@ import {RxParser} from './regexp-parser';
 import {MANY, TERM, PERHAPS_MORE, BOUNDARY, matchable,boundary,dot,or,zero_or_one,zero_or_more,anychar,charset,OP,
         SKIP, BS, LP, RP, OR,  ZERO_OR_ONE, ZERO_OR_MORE, ONE_OR_MORE, DOT, FALSE, DONE, MAYBE, MORE, FAILED,
         RX_OP, RX_UNARY, RX_CONS,RX_OR, RX_ZERO_OR_ONE,RX_ZERO_OR_MORE, RX_ONE_OR_MORE,copyNode, stdRxMeta, 
-        makeCharSet, makeFSM, rxMatchArr, rxNextState, rxMatch,rxCanReach, rxGetActualStartState, advancedRxMatcher} from './rxtree';
+        makeCharSet, makeFSM, rxMatchArr, rxNextState, rxMatch,rxCanReach, rxGetActualStartState, advancedRxMatcher,
+        HOLDER_ZERO_OR_MORE, HOLDER_ANY, HOLDER_ZERO_OR_ONE } from './rxtree';
 
 import {incrRegEx, IREGEX, convertMask ,isMeta, isOptional,isHolder } from "./incr-regex-v3";
 import {printExpr,printExprS} from "./rxprint";

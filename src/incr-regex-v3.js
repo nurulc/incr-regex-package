@@ -23,7 +23,8 @@ import {ID, makeRegexp, parseMulti, odd, gtPrec,sprefix,rprefix,shead,stail,sRig
         n_removeAll, flatten,arr_push , arr_uniq } from "./utils";
 
 
-import { matchable,boundary,dot,or,zero_or_one,zero_or_more, DONE, FAILED, MORE, MAYBE,makeFSM, getArrayFixedAt} from "./rxtree";
+import { matchable,boundary,dot,or,zero_or_one,zero_or_more, DONE, FAILED, MORE, MAYBE,makeFSM, getArrayFixedAt,
+         HOLDER_ZERO_OR_MORE, HOLDER_ANY, HOLDER_ZERO_OR_ONE } from "./rxtree";
 
 // matchable, boundary,
 import {RxParser} from './regexp-parser';
@@ -41,7 +42,7 @@ export function incrRegEx(str,v) {
   return new IREGEX(str, v);
 }
 
-
+/*
 //========== CODE TO CHECK MINIMUM NUMBER of characters that must be input to finish the RegEx
 //const HOLDER_ZERO_OR_MORE = '*';//"\u20e4" "\u2733" "\u2026";
 //const HOLDER_ANY = '_';//"\u2581";
@@ -50,7 +51,7 @@ export function incrRegEx(str,v) {
 export const HOLDER_ZERO_OR_MORE = "\u22ef";// "\u26b9"; //"\u20e4" ;
 export const HOLDER_ANY = "\uff3f"; //"\u268a";//"\u05b7";//"\u035f"; ////"\u2581"; //"\u0332"; //"\u268a"; //
 export const HOLDER_ZERO_OR_ONE = "\u25d1"; //"\u21a0";
-
+*/
 /*
 const HOLDER_ZERO_OR_MORE = "*";
 const HOLDER_ANY = "_";

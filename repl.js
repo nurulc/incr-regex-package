@@ -3,6 +3,7 @@ const repl = require('repl');
 var msg = 'message';
 var rx = require("./lib/index");
 var utils = require("./lib/utils");
+var rxTree = require("./lib/rxtree");
 
 //Create node repl
 var c = repl.start('> ').context;
@@ -43,6 +44,11 @@ var c = repl.start('> ').context;
 //  rx, incrRegEx, printExpr, p, RXInputMast
 //
 // Note: c = repl context
+
+c.rxTree = rxTree;
+c.rxStepArr = rxTree.rxStepArr;
+c.advancedRxMatcher = rxTree.advancedRxMatcher;
+
 c.rx = rx;// 
 c.help = function(containsStr) {
   var s = "";
@@ -99,13 +105,36 @@ function st(arr) { return arr.map(c.printExpr).toArray().join("\n"); }
 function ot(iRx) {
   return iRx.current === iRx.one? iRx.two : iRx.one;
 }
+c.st = st;
+c.ot = ot;
+c.pr =pr;
+c.getStr = getStr;
+c.getStateLen = getStateLen;
+c.getStateFixed = getStateFixed;
+
+c.x = c.incrRegEx(/...\b\b../);
+function st(arr) { return arr.map(c.printExpr).toArray().join("\n"); }
+function ot(iRx) {
+  return iRx.current === iRx.one? iRx.two : iRx.one;
+}
 function pr(iRx) {
   return ["match: [" + st(iRx.current)+"]\n",
           "prev: [" + st(ot(iRx))+"]\n",
       iRx.tracker.map(a => '<'+a[0]+'>').join("")];
 }
-c.st = st;
-c.ot = ot;
-c.pr =pr;
-c.x = c.incrRegEx(/...\b\b../);
-[ c.x.matchStr("   ab"), c.x.state()]
+// arr = [ [state, ch] ...]
+function getStr(arr) {
+  return arr.reduce( (str, [state,ch]) => str+ch, '');
+}
+
+function getStateLen(arr) {
+  return arr.map( ([[state],ch]) => state === undefined?0:state.length);
+}
+
+function getStateFixed(arr) {
+  const fx = ( 
+      ([state,ch]) => state === undefined? '~' : (getArrayFixedAt(state[1]) || '_') 
+  );
+  return arr.map( fx );
+}
+
