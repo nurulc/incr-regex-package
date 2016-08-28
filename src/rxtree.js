@@ -1,6 +1,8 @@
 //rxtree.js
 //import {printExpr} from "./rxprint"; 
 import {StackDedup} from "./utils";
+import {getArrayMask}  from "./incr-regex-v3"; // debugging only
+import {printExpr, printExprN} from "./rxprint"; // debugging
 export function MANY() {}
 export function TERM() { }
 export function PERHAPS_MORE(){ }
@@ -283,7 +285,7 @@ export function rxNextState(currState) {
 
 function rxCanReach(rxN, rxTargetStateList,stop) {
 	if( rxN === stop ) return undefined;
-	if( rxN === DONE ) return undefined;
+	if( rxN === DONE || rxN === undefined) return undefined;
     else if( dot(rxN) ) {
       return rxCanReach(rxN.left,rxTargetStateList,stop);
     }
@@ -304,7 +306,8 @@ function rxCanReach(rxN, rxTargetStateList,stop) {
        	   if( rxTargetStateList.contains(rxN.nextNode) )  return rxN;
        	   return undefined;
        } */	
-       return rxCanReach(rxN.nextNode,rxTargetStateList,stop);
+       //return rxCanReach(rxN.nextNode,rxTargetStateList,stop);
+       return undefined;//
     }
     return undefined;
 }
@@ -315,12 +318,28 @@ export function computeReachableList(arrIn) {
 	for(let i = arr.length-2; i>= 0; i--) {
 		let [[match0, possibleMatch0], c0] = arr[i];
 		let [[match1, possibleMatch1], c1] = arr[i+1];
-		let result0 = match0.filter( v => rxCanReach(v,match1) );
+		//let result0 = rxNextState(match0).filter( v => rxCanReach(v,match1) );
+		let result0 = match0.filter( v => {
+			let res = rxCanReach(v.nextNode,match1);
+			//if( res !== undefined  ) console.log("can Reach :" +printExprN(v), match1.map(printExpr)); 
+			return res;
+		 }
+		);
+	    
+
 		let cr = getArrayFixedAt(result0) || c0;
 		arr[i] = [[result0, possibleMatch0], cr];
 	}
 	return arr;
 }
+
+export function rxContentsToMask(rxTree, contents) {
+	let [isOk, lastCh, currState, res] = advancedRxMatcher(rxTree, contents);
+	if( !isOk ) return undefined;
+	let reachableList = computeReachableList(res);
+	return reachableList.reduce( (str, [state,ch]) => str+(ch||HOLDER_ANY), '');
+}
+
 
 /*
 

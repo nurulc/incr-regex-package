@@ -19,7 +19,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 "use strict";
 import { assign, copy, extend                                                  } from "./utils";  
 import { incrRegEx,convertMask ,isMeta, isOptional,isHolder                    } from "./incr-regex-v3";  
-import {DONE,MORE,MAYBE,FAILED}                                                  from './rxtree';
+import {DONE,MORE,MAYBE,FAILED,rxContentsToMask}                                 from './rxtree';
 
 
 function _fixTracker(tracker,i) {
@@ -89,6 +89,14 @@ export class RxMatcher {
   */
   updateFixed(start,end) {
     //console.log(`updateFixed: ${start}, ${end} not yet implemented`);
+    let s = this.matcher.inputStr();
+    s = rxContentsToMask(this.matcher.base,s);
+    if( s != undefined ) {
+      this.matcher.reset();
+      this.matcher.matchStr(s);
+      return true;
+    }
+    return false;
   }
 
   setPos(ix) {

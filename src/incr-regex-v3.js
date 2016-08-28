@@ -276,7 +276,7 @@ const getArrayMaskListFull = arrayMaskListBuilder(mapper,true);
 const getArrayMaskList = arrayMaskListBuilder(mapper,false);
 
 
-const getArrayMask = (() => {
+export const getArrayMask = (() => {
      const unit = (a) => a ;
      const addElem = (a,b) => a+b;
      const merge = (a,b) => rationalize(a,b);
