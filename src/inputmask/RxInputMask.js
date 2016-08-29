@@ -234,6 +234,7 @@ export class RXInputMask{
     this.selection.start = this.selection.end = start;
     //console.log("Before:", selectionBefore, " After:",this.selection);
     this.pattern.fixTracker();
+    
     // History
     if (this._historyIndex !== null) {
       // Took more input after undoing, so blow any subsequent history away

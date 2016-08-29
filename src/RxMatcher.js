@@ -22,6 +22,12 @@ import { incrRegEx,convertMask ,isMeta, isOptional,isHolder                    }
 import {DONE,MORE,MAYBE,FAILED,rxContentsToMask}                                 from './rxtree';
 
 
+// array of [ [type, ch] ...]
+function hasMetaChars(tracker) { 
+  return tracker.find(([_, ch]) => isHolder(ch));
+}
+
+
 function _fixTracker(tracker,i) {
   let elem = tracker[i];
   if(elem[1] !== undefined && elem[0] !== elem[1]) {
@@ -87,8 +93,10 @@ export class RxMatcher {
       correct algorithm for this to handle all edge cases, but the
       back propogation method will handle most cases
   */
-  updateFixed(start,end) {
+  updateFixed() {
     //console.log(`updateFixed: ${start}, ${end} not yet implemented`);
+    //this.fixTracker();
+    //if( !hasMetaChars(this.getInputTracker())) return false;
     let s = this.matcher.inputStr();
     s = rxContentsToMask(this.matcher.base,s);
     if( s != undefined ) {
