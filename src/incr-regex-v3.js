@@ -25,7 +25,7 @@ import {ID, makeRegexp, parseMulti, odd, gtPrec,sprefix,rprefix,shead,stail,sRig
 
 import { matchable,boundary,dot,or,zero_or_one,zero_or_more, DONE, FAILED, MORE, MAYBE,makeFSM, getArrayFixedAt,
          HOLDER_ZERO_OR_MORE, HOLDER_ANY, HOLDER_ZERO_OR_ONE } from "./rxtree";
-
+import testZ from "./rxtree"
 // matchable, boundary,
 import {RxParser} from './regexp-parser';
 import {printExpr} from "./rxprint";        
@@ -36,7 +36,10 @@ export function regexx(str,v) {
 }
 */
 
-[matchable,boundary,dot,or,zero_or_one,zero_or_more, DONE, FAILED, MORE, MAYBE, makeFSM].map( e => { if( e ===undefined ) throw new Error("boundary not defined") } );
+console.log(testZ);
+[["matchable",matchable], ["boundary",boundary], ["dot",dot], ["or",or], ["zero_or_one",zero_or_one], ["zero_or_more,",zero_or_more],
+    ["MORE,",MORE], ["MAYBE,",MAYBE], ["makeFS",makeFSM], ["DONE,",DONE], ["FAILED,",FAILED]
+].map( e => { if( e[1] ===undefined ) throw new Error(e[0] + " not defined") } );
 
 export function incrRegEx(str,v) {
   return new IREGEX(str, v);

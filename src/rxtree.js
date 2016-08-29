@@ -1,8 +1,9 @@
 //rxtree.js
 //import {printExpr} from "./rxprint"; 
+"use strict";
 import {StackDedup} from "./utils";
-import {getArrayMask}  from "./incr-regex-v3"; // debugging only
-import {printExpr, printExprN} from "./rxprint"; // debugging
+//import {getArrayMask}  from "./incr-regex-v3"; // debugging only
+//import {printExpr, printExprN} from "./rxprint"; // debugging
 export function MANY() {}
 export function TERM() { }
 export function PERHAPS_MORE(){ }
@@ -406,6 +407,10 @@ export function advancedRxMatcher(rxN,str) {
 		   return [false,lastCh, currState, res]
 	}, [true,undefined, new StackDedup(startNode), [] ]);
 }
+
+[["matchable",matchable], ["boundary",boundary], ["dot",dot], ["or",or], ["zero_or_one",zero_or_one], ["zero_or_more,",zero_or_more],
+    ["MORE,",MORE], ["MAYBE,",MAYBE], ["makeFS",makeFSM], ["DONE,",DONE], ["FAILED,",FAILED]
+].map( e => { if( e[1] ===undefined ) throw new Error(e[0] + " not defined") } );
 
 export const RXTREE = { MANY, TERM, PERHAPS_MORE, BOUNDARY, matchable,boundary,dot,or,zero_or_one,zero_or_more,anychar,charset,OP,
                         SKIP, BS, LP, RP, OR,  ZERO_OR_ONE, ZERO_OR_MORE, ONE_OR_MORE, DOT, FALSE, DONE, MAYBE, MORE, FAILED,

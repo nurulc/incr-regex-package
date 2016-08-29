@@ -123,12 +123,13 @@ function pr(iRx) {
       iRx.tracker.map(a => '<'+a[0]+'>').join("")];
 }
 // arr = [ [state, ch] ...]
+/*
 function getStr(arr) {
   return arr.reduce( (str, [state,ch]) => str+ch, '');
 }
 
 function getStateLen(arr) {
-  return arr.map( ([[state],ch]) => state === undefined?0:state.length);
+  //return arr.map( ([[state],ch]) => state === undefined?0:state.length);
 }
 
 function getStateFixed(arr) {
@@ -137,4 +138,4 @@ function getStateFixed(arr) {
   );
   return arr.map( fx );
 }
-
+*/
