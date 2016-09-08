@@ -36,7 +36,6 @@ node_modules
 .node_repl_history
 
 # build
-build
 boot.js
 conversions.js
 jstest.js

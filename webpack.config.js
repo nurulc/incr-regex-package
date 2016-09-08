@@ -1,5 +1,5 @@
 var path = require('path');
-//var webpack = require('webpack');
+var webpack = require('webpack');
 
 
 module.exports = {
@@ -7,7 +7,7 @@ module.exports = {
     entry:  './src/index',
     output: {
         path:     path.join(__dirname, 'build'),
-        filename: 'incr-regex.js',
+        filename: 'incr-regexp.js',
         publicPath: '',
         libraryTarget: "var",
         // name of the global var: "Foo"
@@ -18,9 +18,12 @@ module.exports = {
         loaders: [
             {
                 test:   /\.js$/,
-                loaders: ['babel-loader'],
+                loader: 'babel',
                 exclude: path.join(__dirname , 'src/test'),
                 include: path.join(__dirname , 'src'),
+                query: {
+                    presets: ['react', 'es2015']
+                }
           
             }
         ],

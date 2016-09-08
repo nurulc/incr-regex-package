@@ -8,6 +8,7 @@
     "build": "babel src --out-dir lib && cp -R lib/*  ../react-rxinput/node_modules/incr-regex-package/lib/",
     "watch:js": "babel src --out-dir lib --watch ",
     "lint": "jshint src",
+    "pack": "node node_modules/webpack/bin/webpack",
     "localdeploy": "cp -R lib/*  ../react-rxinput/node_modules/incr-regex-package/lib/"
   },
   "repository": {
