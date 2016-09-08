@@ -1,11 +1,10 @@
 {
   "name": "incr-regex-package",
-  "version": "0.9.9",
+  "version": "1.0.0",
   "description": "An incremental regular expression parser in JavaScript; useful for input validation, RegExp",
   "main": "lib/index.js",
   "scripts": {
     "test": "mocha -R spec  --compilers js:babel-register src/test/*.js",
-    "testx": "mocha -R spec --compilers js:mocha-babel src/test/*.js",
     "build": "babel src --out-dir lib && cp -R lib/*  ../react-rxinput/node_modules/incr-regex-package/lib/",
     "watch:js": "babel src --out-dir lib --watch ",
     "lint": "jshint src",
