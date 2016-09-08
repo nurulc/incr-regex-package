@@ -366,7 +366,7 @@ export function rxStepArr(c,lastCh, currState) {
 	return matchingStates !== undefined? [matchingStates, possibleStates] : undefined;
 }
 
-
+/*
 function advancedRxMatcherOLD(rxN,str) {
 	let state0 = new StackDedup(rxN); 
 	let firstCh =  str.charAt(0);
@@ -388,6 +388,7 @@ function advancedRxMatcherOLD(rxN,str) {
 		   return [false,lastCh, currState, res]
 	}, [true,firstCh, state0, [ [state0,firstCh] ] ]);
 }
+*/
 
 export function advancedRxMatcher(rxN,str) {
 	let startNode = {}; startNode.nextNode = rxN; // fake head node, we need to do this because the first 
