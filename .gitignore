@@ -31,7 +31,6 @@ node_modules
 
 #backup
 *.bak
-
 # Optional REPL history
 .node_repl_history
 
@@ -42,3 +41,4 @@ jstest.js
 src/RxMatcher.js.bak
 src/inputmask/RxInputMask.js.bak
 src/sample-code.js.bak
+bin
