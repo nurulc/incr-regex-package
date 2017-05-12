@@ -74,6 +74,10 @@ export class RXInputMask{
     });
 
   }
+/** 
+ * Get the state of object
+ * @returns { pattern: RegExp, selection: { start: int, end: int}, value: String}
+*/
 
   getState() {
     let options = {
@@ -82,6 +86,7 @@ export class RXInputMask{
       value: this._getValue(),
       history: {data: [], index: null, lastOp: null}
     };
+    return  options;
   }
 
   /**
@@ -133,7 +138,7 @@ export class RXInputMask{
 * the syatem tries to take care of the fixed characters
 * this is the same as the public input() method but it does not update history
 * 
-*  returns:  [status:boolean, newSelection:Selection, newPattern:]
+*  returns:  [status:boolean, newSelection:Selection, newPattern: RegExp]
 *
 */
 

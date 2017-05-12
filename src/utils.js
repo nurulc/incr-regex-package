@@ -118,7 +118,8 @@ export const contract = (function() {
   //Manditory contract
   const func = typeOf("function");
   const isFunc = isTypeOf("function");
-
+  const STR = typeOf('String');
+  
   // Creates a contract for an object inheriting from ctor
   const instanceOf = function(ctor) {
       return function(inst) {

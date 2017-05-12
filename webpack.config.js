@@ -3,7 +3,7 @@ var webpack = require('webpack');
 
 
 module.exports = {
-	devtool: 'eval',
+//	devtool: 'eval',
     entry:  './src/index',
     output: {
         path:     path.join(__dirname, 'build'),
@@ -27,7 +27,15 @@ module.exports = {
           
             }
         ],
-    }
+    },
+    plugins: [
+        new webpack.optimize.UglifyJsPlugin({
+                  compress: {
+                      warnings: false
+                  },
+                  output: {comments: false}
+              })
+  ], 
 };
 
 /*
