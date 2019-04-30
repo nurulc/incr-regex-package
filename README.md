@@ -113,9 +113,7 @@ _Some of the other future possibilities with the package:_
 
 1. Generate string that will match a regular expression. This is very useful for generating sample strings from a regular expression
 2. Support for a smart regex tester
-3. Create railroad diagrams from a regular expression
-4. Creating regex not from strings but programatically, for example using a fluent API
- 
+3. Create railroad diagram
 Perhaps something like this:
 ```JavaScript
    var exp = RX.or("hello","goodbye","hi")
@@ -126,7 +124,9 @@ Perhaps something like this:
                         RX.except("[aeiouAEIO]")
                         )
                   );
-   // same as
+   // same ass from a regular expression
+4. Creating regex not from strings but programatically, for example using a fluent API
+ 
    var rx1 = /(hello|goodbye|hi)(my friend)?[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTUVWXYZ]*/
 ````
 ### Testing
@@ -183,6 +183,10 @@ a second ***@***, *for example:* ***nurulc@abc@*** is not allowed. Another examp
 
 if you type: ***1234*** I should not be able to enter that, since the input would never validate. While if I enter ***123-*** this is valid up to that point in the input. Of course if you leave the input box, what you have entered is not a
 complete match and will show that this is not a valid phone number. The second case is handled perfectly by the standard JavaScript regular expression, but not
+
+
+![](diag.svg)
+
 while you are entering the data.
 
 ## The API
