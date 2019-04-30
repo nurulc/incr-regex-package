@@ -12,7 +12,7 @@ A --> D(d)
 B --> B1("[0-9]")
 B1 --> B2("-")
 B2 --> B3("[0-9]")
-C --> C1(a)
+C -- Fail --> C1(a)
 C1 --> C2(t)
 D --> D1(o)
 D1 --> D2(g)
@@ -21,19 +21,20 @@ C2 --> END
 B3 --> END
 class A green;
 
-subgraph step0: input char 'd'
-W>pos1] -. create 3 threads .-> A
-end
-
 subgraph step1: char 'd' 
 X>pos1] -. match and  move .-> B
 Y>pos3] -. <b>fail</b>, drop thread .-> C
 Z>pos2]  -. match and move .-> D
 end
 
+subgraph step0: input char 'd'
+W>pos1] -. create 3 threads .-> A
+end
+
+
 subgraph step2: char '2'
 X1>pos1] -.match and move.-> B1
-Y1>pos2] -.<b>fail</b>, drop thread.-> C1
+Y1>pos2] -.<b>fail</b>, drop thread.-> D1
 end
 
 subgraph step3: char '-'
