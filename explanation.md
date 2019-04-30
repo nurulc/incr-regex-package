@@ -32,7 +32,8 @@ This is a brief explanation of the algorithm. Suppose we have the following rege
 
 we parse the regexp to create the following tree:
 
-![](regexp-tree.svg)
+![](regex-tree.svg)
 
 We process the the tree to get the following graph:
 
+![](diag.svg)
