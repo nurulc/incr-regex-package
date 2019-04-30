@@ -34,8 +34,12 @@ we parse the regexp to create the following tree:
 
 ![](regex-tree.svg)
 
+----
+
 We process the the tree to get the following graph:
 
 ![](regex-init-graph.svg)
 
-![](regex-diag.svg)
+[Next - show processing steps](process1.md)
+
+
