@@ -185,7 +185,7 @@ if you type: ***1234*** I should not be able to enter that, since the input woul
 complete match and will show that this is not a valid phone number. The second case is handled perfectly by the standard JavaScript regular expression, but not
 
 
-![](diag.svg)
+![](regex-diag.svg)
 
 while you are entering the data.
 
