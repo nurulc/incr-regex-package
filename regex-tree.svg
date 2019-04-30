@@ -396,7 +396,7 @@
                             </foreignObject>
                         </g>
                     </g>
-                    <text x="0" y="-272.21875" fill="black" stroke="none" id="mermaid-1556641247696Text" style="text-anchor: middle;">match1</text>
+                    <text x="0" y="-272.21875" fill="black" stroke="none" id="mermaid-1556641247696Text" style="text-anchor: middle;">[a-z][0-9]-[0-9]</text>
                 </g>
                 <g class="cluster" id="subGraph0" transform="translate(506.39453125,70.75)" style="opacity: 1;">
                     <rect width="819.703125" height="101.5" x="-409.8515625" y="-50.75"></rect>
