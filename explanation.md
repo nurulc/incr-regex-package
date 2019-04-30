@@ -25,3 +25,14 @@ _[0-9]{5}-[0-9]{4}_ :
 | "90210-5" | _PARTIAL_ |
 | "90210-5003" | _DONE_ |
 | "90210-500A" | _FAIL_ |
+
+### The Algorithm
+
+This is a brief explanation of the algorithm. Suppose we have the following regexp _[a-z][0-9]-[0-9]|cat|dog_
+
+we parse the regexp to create the following tree:
+
+![](regexp-tree.svg)
+
+We process the the tree to get the following graph:
+
