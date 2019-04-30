@@ -5,17 +5,18 @@ regexp or you fail. This package provides a more flexible approach will return o
 
 | Status | Description |
 | ------ | ----        |
-| DONE | String matches completely |
-| OK  | The regexp matches, but will accept more characters, for example a zip code may be 5
- digits or 9 digits  |
-| PARTIAL | The regexp matches the string so far but is incomplete, i.e. needs more characters |
-| FAIL | The string does not match the regexp |
+| _DONE_ | String matches completely |
+| _OK_  | The regexp matches, but will accept more characters, for example a zip code may be 5 digits or 9 digits  |
+| _PARTIAL_ | The regexp matches the string so far but is incomplete, i.e. needs more characters |
+| _FAIL_ | The string does not match the regexp |
 
 ----
 
 ### Example
 using the zipcode exmple 
-___[0-9]{5}-[0-9]{4}___ :
+
+__Reg Expression__ :
+_[0-9]{5}-[0-9]{4}_ :
 
 | String | Status |
 | ------ | ----   |
