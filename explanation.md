@@ -36,4 +36,4 @@ we parse the regexp to create the following tree:
 
 We process the the tree to get the following graph:
 
-![](diag.svg)
+![](regex-diag.svg)
