@@ -1,0 +1,12 @@
+graph LR
+T["Reg Exp with ...'< RegExp>'*... ..."]
+X(...) --> A
+A(("|")) --> B("Reg Exp")
+A --> C("...")
+C --> F(...)
+B -->A
+
+classDef cyan fill:#aff,stroke:#333;
+classDef green fill:#af9,stroke:#333;
+class C,F,X cyan
+class A,T green
