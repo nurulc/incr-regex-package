@@ -2,6 +2,14 @@
 
 ![](regex-graph-1.svg)
 
+at __pos1__ we find a control node that leads to three possible paths. We add all the paths to a process list:
+
+| list | Target |
+| --- | --- |
+| pos1 | '[a-z]' |
+| pos2 | 'd'  |
+| pos3 | 'c' |
+
 
 ### Step1
 
