@@ -15,11 +15,11 @@ Start at the begining of the graph with one process point __pos1__
 
 at __pos1__ we find a control node that leads to three possible paths. We add all the paths to a process list:
 
-| list |
-| --- |
-| pos1 |
-| pos2 |
-| pos3 |
+| list | Target |
+| --- | --- |
+| pos1 | 'c' |
+| pos2 | '[a-z]' |
+| pos3 | 'd' |
 
 we follow all these paths
 
