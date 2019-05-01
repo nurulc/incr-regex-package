@@ -11,4 +11,4 @@ Each of the paths __pos1__, __pos2__, and __pos3__ require that we match a chara
 
 ![](regex-graph-3.svg)
 
-[Next Seep 3](step3.md)
+[Next Step 3](step3.md)
