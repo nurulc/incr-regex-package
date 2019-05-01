@@ -32,14 +32,14 @@ This is a brief explanation of the algorithm. Suppose we have the following rege
 
 we parse the regexp to create the following tree:
 
-![](regex-tree.svg)
+![](docs/regex-tree.svg)
 
 ----
 
 We process the the tree to get the following graph:
 
-![](regex-init-graph.svg)
+![](docs/regex-init-graph.svg)
 
-[Next - show processing steps](process1.md)
+[Next - show processing steps](docs/process1.md)
 
 
