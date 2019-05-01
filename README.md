@@ -184,7 +184,8 @@ a second ***@***, *for example:* ***nurulc@abc@*** is not allowed. Another examp
 if you type: ***1234*** I should not be able to enter that, since the input would never validate. While if I enter ***123-*** this is valid up to that point in the input. Of course if you leave the input box, what you have entered is not a
 complete match and will show that this is not a valid phone number. The second case is handled perfectly by the standard JavaScript regular expression, but not while you are entering the data.
 
-The following link will explain how the matching works: [How It Works](explanation.md)
+### How it works
+The following link will explain how the matching works: [How It Works](docs/explanation.md)
 
 
 
