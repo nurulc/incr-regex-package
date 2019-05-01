@@ -1,5 +1,7 @@
 ### Processing Steps
 
+This section will explain the processin steps for matching the string ___d2-1___ and the regular expression is _cat|dog|[a-z][0-9]-[0-9]_ 
+
 The basic processing steps are as follows:
 
 Start at the begining of the graph with one process point __pos1__
