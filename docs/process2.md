@@ -10,6 +10,7 @@ at __pos1__ we find a control node that leads to three possible paths. We add al
 | pos2 | 'd'  |
 | pos3 | 'c' |
 
+Test for character ___'d'___
 
 ### Step1
 
