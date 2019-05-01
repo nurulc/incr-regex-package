@@ -17,9 +17,9 @@ at __pos1__ we find a control node that leads to three possible paths. We add al
 
 | list | Target |
 | --- | --- |
-| pos1 | 'c' |
-| pos2 | '[a-z]' |
-| pos3 | 'd' |
+| pos1 | '[a-z]' |
+| pos2 | 'd'  |
+| pos3 | 'c' |
 
 we follow all these paths
 
