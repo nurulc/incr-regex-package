@@ -1,11 +1,11 @@
-# incr-regex-package
-A node package for incremental regular expression matching in JavaScript - matching one character at a time. This is a feature not available in the wonderful and fast RegEx capability of JavaScript, a regular expression that can match on charcter at a time. Once you have this basic capability you can do some amazing things:
+# Incremental Regular Expression Matcher
+A node package for incremental regular expression matching in JavaScript - matching one character at a time. This is a feature not available in the powerful and fast RegEx capability of JavaScript. When you use a regular expression to match a string, you have to give it the entire string and the matcher will either match or fail. But there is a usecase where that is not sufficent, processinng user input as it arrives one character at a time. Fot his we need a regular expression that can match on charcter at a time as it arrives and tells you if the match is good so far, and if it is good if more characters could be matched. Once you have this basic capability you can do some amazing things:
 
 
 ## Capabilities provided by the package
 [Demo here](https://nurulc.github.io/) play with the code [here - for developers](https://tonicdev.com/npm/incr-regex-package)
 
-1. On the fly input validation support
+1. Input validation support as you type.
 1. Automatically supply input for fixed values, e.g. /Phone: [0-9]+/ it can tell you that 'Phone: ' is the only acceptable input at the begining 
 1. Provide masked input, for example a phone number  ```(___)-___-____```
 1. Provide multiple alternative masks phone number with and without extension ```(___)-___-____ Ext: ___```
