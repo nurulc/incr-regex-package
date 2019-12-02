@@ -1,0 +1,87 @@
+linking to my own version of the regexp visualizer
+
+# --------------
+# Please enter the commit message for your changes. Everything below
+# this paragraph is ignored, and an empty message aborts the commit.
+# Just close the window to accept your message.
+diff --git a/src/incr-regex-v3.js b/src/incr-regex-v3.js
+index b9cf787..61a1256 100644
+--- a/src/incr-regex-v3.js
++++ b/src/incr-regex-v3.js
+@@ -1,19 +1,19 @@
+-/*
+-Copyright (c) 2016, Nurul Choudhury
+-
+-Permission to use, copy, modify, and/or distribute this software for any
+-purpose with or without fee is hereby granted, provided that the above
+-copyright notice and this permission notice appear in all copies.
+-
+-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+-WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+-MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+-ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+-WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+-ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+-OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+-
+-*/
++/** 
++ * Copyright (c) 2016, Nurul Choudhury
++ * 
++ * Permission to use, copy, modify, and/or distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ * 
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ * 
++ */
+ 
+ //
+ "use strict";
+@@ -30,11 +30,7 @@ import testZ from "./rxtree"
+ import {RxParser} from './regexp-parser';
+ import {printExpr} from "./rxprint";        
+ 
+-/*
+-export function regexx(str,v) {
+-  return new RX(str, v);
+-}
+-*/
++
+ 
+ console.log(testZ);
+ [["matchable",matchable], ["boundary",boundary], ["dot",dot], ["or",or], ["zero_or_one",zero_or_one], ["zero_or_more,",zero_or_more],
+@@ -47,18 +43,7 @@ export function incrRegEx(str,v) {
+ 
+ /*
+ //========== CODE TO CHECK MINIMUM NUMBER of characters that must be input to finish the RegEx
+-//const HOLDER_ZERO_OR_MORE = '*';//"\u20e4" "\u2733" "\u2026";
+-//const HOLDER_ANY = '_';//"\u2581";
+-//const HOLDER_ZERO_OR_ONE = "?";//  "\u21a0"
+ 
+-export const HOLDER_ZERO_OR_MORE = "\u22ef";// "\u26b9"; //"\u20e4" ;
+-export const HOLDER_ANY = "\uff3f"; //"\u268a";//"\u05b7";//"\u035f"; ////"\u2581"; //"\u0332"; //"\u268a"; //
+-export const HOLDER_ZERO_OR_ONE = "\u25d1"; //"\u21a0";
+-*/
+-/*
+-const HOLDER_ZERO_OR_MORE = "*";
+-const HOLDER_ANY = "_";
+-const HOLDER_ZERO_OR_ONE = "?"
+ 
+ */
+ 
+@@ -66,7 +51,7 @@ export function convertMask(s) {
+   let a  = [];
+   return s.split('').map( c => 
+                         c==="*"    ? HOLDER_ZERO_OR_MORE : (
+-                        c==="?"    ? HOLDER_ZERO_OR_ONE : 
++                        c==="?"    ? HOLDER_ZERO_OR_ONE : 568
+                         (c === "_" ? HOLDER_ANY : c ))
+               ).join('');
+ }

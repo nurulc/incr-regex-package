@@ -29,21 +29,15 @@
     "matching"
   ],
   "devDependencies": {
-    "babel": "*",
-    "babel-cli": "*",
-    "babel-loader": "*",
-    "babel-preset-es2015": "*",
-    "babel-preset-react": "*",
-    "babel-register": "*",
-    "babel-runtime": "*",
+    "@babel/cli": "^7.7.4",
+    "@babel/core": "^7.7.4",
+    "@babel/preset-env": "^7.7.4",
+    "chai": "^3.4.1",
     "jshint": "^2.9.2",
     "mocha": "*",
-    "chai": "^3.4.1",
     "webpack": "*"
   },
-  "dependencies": {
-    
-  },
+  "dependencies": {},
   "author": "Nurul Choudhury",
   "license": "ISC",
   "bugs": {
