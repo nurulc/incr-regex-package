@@ -40,8 +40,7 @@ export  {
   RX_OP, RX_UNARY, RX_CONS,RX_OR, RX_ZERO_OR_ONE,RX_ZERO_OR_MORE, RX_ONE_OR_MORE,copyNode, stdRxMeta, 
   makeCharSet, makeFSM, rxMatchArr, rxNextState, rxMatch, rxCanReach, rxGetActualStartState, advancedRxMatcher,
   incrRegEx,printExpr,printExprS,
-  RxParser,RXInputMask, contract, RxMatcher,
-  matchable,dot,or,zero_or_one,zero_or_more, 
+  RxParser,RXInputMask, contract, RxMatcher, 
   IREGEX,convertMask ,isMeta, isOptional,isHolder 
 };
 

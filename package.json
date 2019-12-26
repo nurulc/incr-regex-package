@@ -1,10 +1,10 @@
 {
   "name": "incr-regex-package",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "An incremental regular expression parser in JavaScript; useful for input validation, RegExp",
   "main": "lib/index.js",
   "scripts": {
-    "test": "mocha -R spec  --compilers js:babel-register src/test/*.js",
+    "test": "mocha -R spec  --require @babel/register src/test/*.js",
     "build": "babel src --out-dir lib",
     "buildx": "babel src --out-dir lib && cp -R lib/*  ../react-rxinput/node_modules/incr-regex-package/lib/",
     "watch:js": "babel src --out-dir lib --watch ",
@@ -32,12 +32,18 @@
     "@babel/cli": "^7.7.4",
     "@babel/core": "^7.7.4",
     "@babel/preset-env": "^7.7.4",
-    "chai": "^3.4.1",
-    "jshint": "^2.9.2",
-    "mocha": "*",
-    "webpack": "*"
+    "@babel/register": "^7.7.4",
+    "babel-loader": "^8.0.6",
+    "chai": "^3.5.0",
+    "jshint": "^2.10.3",
+    "mocha": "^6.2.2",
+    "terser-webpack-plugin": "^2.2.1",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
   },
-  "dependencies": {},
+  "dependencies": {
+    "core-js": "^3.4.5"
+  },
   "author": "Nurul Choudhury",
   "license": "ISC",
   "bugs": {

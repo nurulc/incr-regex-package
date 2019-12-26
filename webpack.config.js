@@ -1,9 +1,11 @@
 var path = require('path');
 var webpack = require('webpack');
+var TerserPlugin = require('terser-webpack-plugin');
 
 
 module.exports = {
 //	devtool: 'eval',
+    mode: 'production',
     entry:  './src/index',
     output: {
         path:     path.join(__dirname, 'build'),
@@ -15,19 +17,27 @@ module.exports = {
 
     },
     module: {
-        loaders: [
+        rules: [
             {
                 test:   /\.js$/,
-                loader: 'babel',
-                exclude: path.join(__dirname , 'src/test'),
-                include: path.join(__dirname , 'src'),
-                query: {
-                    presets: ['react', 'es2015']
+                exclude: [path.join(__dirname , "node_modules"),path.join(__dirname , 'src/test'), path.join(__dirname , 'lib')],
+                use: {
+                  loader: 'babel-loader',
+                  query: {
+                      presets: ['@babel/env']
+                  }
                 }
-          
             }
         ],
     },
+
+    optimization: {
+      minimize: true
+
+    } 
+};
+
+/*
     plugins: [
         new webpack.optimize.UglifyJsPlugin({
                   compress: {
@@ -35,10 +45,17 @@ module.exports = {
                   },
                   output: {comments: false}
               })
-  ], 
-};
-
-/*
+    ],
+      minimizer: [
+        new TerserPlugin({
+          cache: true,
+          parallel: true,
+          sourceMap: false, // Must be set to true if using source-maps in production
+          terserOptions: {
+            // https://github.com/webpack-contrib/terser-webpack-plugin#terseroptions
+          }
+        }),
+      ],
 module.exports = {
   devtool: 'eval',
   entry: [

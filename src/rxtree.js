@@ -301,7 +301,7 @@ export function rxNextState(currState) {
      	rxTargetStateList - the target state we need to reach
 */
 
-function rxCanReach(rxN, rxTargetStateList,stop) {
+export function rxCanReach(rxN, rxTargetStateList,stop) {
 	if( rxN === stop ) return undefined;
 	if( rxN === DONE || rxN === undefined) return undefined;
     else if( dot(rxN) ) {

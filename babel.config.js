@@ -8,6 +8,7 @@ const presets = [
         chrome: "67",
         safari: "11.1",
       },
+      "corejs": "3.4.5",
       useBuiltIns: "usage",
     },
   ],

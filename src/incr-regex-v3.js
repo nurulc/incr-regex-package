@@ -25,14 +25,14 @@ import {ID, makeRegexp, parseMulti, odd, gtPrec,sprefix,rprefix,shead,stail,sRig
 
 import { matchable,boundary,dot,or,zero_or_one,zero_or_more, DONE, FAILED, MORE, MAYBE,makeFSM, getArrayFixedAt,
          HOLDER_ZERO_OR_MORE, HOLDER_ANY, HOLDER_ZERO_OR_ONE } from "./rxtree";
-import testZ from "./rxtree"
+//import testZ from "./rxtree"
 // matchable, boundary,
 import {RxParser} from './regexp-parser';
 import {printExpr} from "./rxprint";        
 
 
 
-console.log(testZ);
+//console.log(testZ);
 [["matchable",matchable], ["boundary",boundary], ["dot",dot], ["or",or], ["zero_or_one",zero_or_one], ["zero_or_more,",zero_or_more],
     ["MORE,",MORE], ["MAYBE,",MAYBE], ["makeFS",makeFSM], ["DONE,",DONE], ["FAILED,",FAILED]
 ].map( e => { if( e[1] ===undefined ) throw new Error(e[0] + " not defined") } );
@@ -51,7 +51,7 @@ export function convertMask(s) {
   let a  = [];
   return s.split('').map( c => 
                         c==="*"    ? HOLDER_ZERO_OR_MORE : (
-                        c==="?"    ? HOLDER_ZERO_OR_ONE : 568
+                        c==="?"    ? HOLDER_ZERO_OR_ONE : /*568*/
                         (c === "_" ? HOLDER_ANY : c ))
               ).join('');
 }
