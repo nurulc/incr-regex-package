@@ -5,9 +5,9 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "mocha -R spec  --require @babel/register src/test/*.js",
-    "build": "babel src --out-dir lib",
-    "buildx": "babel src --out-dir lib && cp -R lib/*  ../react-rxinput/node_modules/incr-regex-package/lib/",
-    "watch:js": "babel src --out-dir lib --watch ",
+    "build": "babel src -d lib",
+    "buildx": "babel src -d lib && cp -R lib/*  ../react-rxinput/node_modules/incr-regex-package/lib/",
+    "watch:js": "babel src -d lib --watch ",
     "lint": "jshint src",
     "pack": "node node_modules/webpack/bin/webpack",
     "localdeploy": "cp -R lib/*  ../react-rxinput/node_modules/incr-regex-package/lib/"
