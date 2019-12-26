@@ -1,0 +1,16 @@
+bin
+docs
+image
+.babelrc-old
+.jshintrc
+.babel.config.js
+*.bak
+*.log
+package-lock.json
+repl.js
+src/test
+lib/test
+backup_js_regex.txt
+COMMIT_EDITMSG.COMMIT_EDITMSG
+src/testideas.js
+lib/testideas.js
