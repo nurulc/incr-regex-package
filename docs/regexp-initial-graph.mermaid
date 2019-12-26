@@ -1,0 +1,29 @@
+graph LR
+classDef green fill:#9f6,stroke:#333;
+classDef orange fill:#f96,stroke:#333;
+classDef blue fill:#69f,stroke:#333;
+classDef cyan fill:#aff,stroke:#333;
+
+start((start)) -.-> A(("| (or)"))
+A --> B("[a-z]")
+A --> C(c)
+A --> D(d)
+B --> B1("[0-9]")
+B1 --> B2("-")
+B2 --> B3("[0-9]")
+C --> C1(a)
+C1 --> C2(t)
+D --> D1(o)
+D1 --> D2(g)
+D2 --> END(DONE)
+C2 --> END(DONE)
+B3 --> END(DONE)
+class A green;
+
+
+
+class X,Y,Z orange;
+class W green;
+class X1 blue
+class X2 cyan
+class END cyan

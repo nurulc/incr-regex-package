@@ -1,0 +1,41 @@
+graph TB
+subgraph Start
+Start(("|"))
+end
+
+subgraph match1
+Start --> b;
+b((.)) --> B(("[a-z]"))
+b --> b1((.))
+b1 --> B1(("[0-9]"))
+b1 --> b2((.))
+b2 --> B2(("-"))
+b2 --> b3((.))
+b3 --> B3(("[0-9]"))
+b3 --> DONE1[DONE]
+end 
+
+
+subgraph cat
+Start --> c((.)) 
+c --> C(("c"))
+c --> c1((.))
+c1 --> C1(("a"))
+c1 --> c2((.))
+c2 --> C2(("t"))
+c2 --> DONE
+end
+
+subgraph dog
+Start --> d((.)) 
+d --> D(("d"))
+d --> d1((.))
+d1 --> D1(("o"))
+d1 --> d2((.))
+d2 --> D2(("g"))
+d2 --> DONE2[DONE]
+end
+classDef cyan fill:#aff,stroke:#333;
+classDef green fill:#af9,stroke:#333;
+class b,b1,b2,b3,c,c1,c2,d,d1,d2 cyan
+class Start,DONE,DONE1,DONE2 green
