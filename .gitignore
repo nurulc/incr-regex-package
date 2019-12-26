@@ -41,4 +41,5 @@ jstest.js
 src/RxMatcher.js.bak
 src/inputmask/RxInputMask.js.bak
 src/sample-code.js.bak
+lib
 bin
