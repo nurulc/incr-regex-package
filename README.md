@@ -53,7 +53,7 @@ What I did not like as the method for defining the mask. It works very well I on
 
 ### Installation
 
-  npm install incr-regexp-package --save
+  npm install incr-regex-package --save
 
 ### Sample index.js file
 
