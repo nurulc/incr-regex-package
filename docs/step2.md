@@ -1,6 +1,5 @@
 #### Previous step
 
-![](regex-graph-2.svg)
 <img src="regex-graph-2.svg" width="400">
 
 #### Step2 match char __'2'__
