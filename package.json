@@ -4,13 +4,12 @@
   "description": "An incremental regular expression parser in JavaScript; useful for input validation, RegExp",
   "main": "lib/index.js",
   "scripts": {
-    "test": "mocha -R spec  --require @babel/register src/test/*.js",
-    "build": "babel src -d lib",
-    "buildx": "babel src -d lib && cp -R lib/*  ../react-rxinput/node_modules/incr-regex-package/lib/",
-    "watch:js": "babel src -d lib --watch ",
+    "test": "mocha -R spec  --require babel-core/register src/test/*.js",
+    "build": "babel src --out-dir lib",
+    "buildx": "babel src --out-dir lib && cp -R lib/*  ../react-rxinput/node_modules/incr-regex-package/lib/",
+    "watch:js": "babel src --out-dir lib --watch ",
     "lint": "jshint src",
-    "pack": "node node_modules/webpack/bin/webpack",
-    "localdeploy": "cp -R lib/*  ../react-rxinput/node_modules/incr-regex-package/lib/"
+    "pack": "node node_modules/webpack/bin/webpack"
   },
   "repository": {
     "type": "git",
@@ -29,21 +28,14 @@
     "matching"
   ],
   "devDependencies": {
-    "@babel/cli": "^7.7.4",
-    "@babel/core": "^7.7.4",
-    "@babel/preset-env": "^7.7.4",
-    "@babel/register": "^7.7.4",
-    "babel-loader": "^8.0.6",
-    "chai": "^3.5.0",
-    "jshint": "^2.10.3",
-    "mocha": "^6.2.2",
-    "terser-webpack-plugin": "^2.2.1",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10"
+    "babel-cli": "^6.26.0",
+    "babel-env": "^2.4.1",
+    "chai": "^3.4.1",
+    "eslint": "^7.2.0",
+    "mocha": "*",
+    "webpack": "^4.43.0"
   },
-  "dependencies": {
-    "core-js": "^3.4.5"
-  },
+  "dependencies": {},
   "author": "Nurul Choudhury",
   "license": "ISC",
   "bugs": {

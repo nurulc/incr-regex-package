@@ -17,7 +17,11 @@
 
 //
 "use strict";
-import {ID, makeRegexp, parseMulti, odd, gtPrec,sprefix,rprefix,shead,stail,sRightMerge,
+// import {gtPrec,sprefix,rprefix,shead,stail,sRightMerge,
+//         stringToList, listToArray, listToString, StackDedup, n_cons, 
+//         n_head, n_tail, n_filter, n_reduce, n_map, n_concat, 
+//         n_removeAll, flatten,arr_push , arr_uniq } from "./utils";
+import {ID,   gtPrec,sprefix,rprefix,shead,stail,sRightMerge,
         stringToList, listToArray, listToString, StackDedup, n_cons, 
         n_head, n_tail, n_filter, n_reduce, n_map, n_concat, 
         n_removeAll, flatten,arr_push , arr_uniq } from "./utils";
@@ -27,8 +31,8 @@ import { matchable,boundary,dot,or,zero_or_one,zero_or_more, DONE, FAILED, MORE,
          HOLDER_ZERO_OR_MORE, HOLDER_ANY, HOLDER_ZERO_OR_ONE } from "./rxtree";
 //import testZ from "./rxtree"
 // matchable, boundary,
-import {RxParser} from './regexp-parser';
-import {printExpr} from "./rxprint";        
+
+//import {printExpr} from "./rxprint";        
 
 
 
@@ -128,6 +132,7 @@ function rationalize(s1,s2) {
 // function binary op form to n-arrya form
 // [ op,  [op, x, y...], z] => [ op, x, y..., z] (applied recursively)
 // [ op,  x, [op, y, z...]] => [ op, x, y, z...] (applied recursively)
+/*
 function flattenRX(arr, code,  res) {
   if(!Array.isArray(arr)) return arr_push(res, arr);
 
@@ -140,6 +145,7 @@ function flattenRX(arr, code,  res) {
   return arr.reduce( (res,a) => flattenRX(a, codex, res));
 }
 
+*/
 
   function isLowerCase(ch) {
     var code = ch.charCodeAt(0);
@@ -159,7 +165,7 @@ function flattenRX(arr, code,  res) {
 
 //unit = [a]
 //merge(a,b) = flatten([a,b]);
-export function makeRxInfo(unit, addElem, merge, optional, mapper) {
+function makeRxInfo(unit, addElem, merge, optional, mapper) {
   const addOpt = (rxNode,prefix) => {
     if(zero_or_more(rxNode)) return addElem(prefix, HOLDER_ZERO_OR_MORE);
     return prefix;
@@ -260,8 +266,7 @@ const arrayMaskListBuilder = ( (mapper,useopt) => {
    return makeArrayRxInfo(makeRxInfo(unit,addElem, merge,optional,mapper), aMerge, unit )
 });
 
-const getArrayMaskListFull = arrayMaskListBuilder(mapper,true);
-const getArrayMaskList = arrayMaskListBuilder(mapper,false);
+
 
 
 export const getArrayMask = (() => {
@@ -274,9 +279,9 @@ export const getArrayMask = (() => {
    }
   )();
 
-  function combine(a,b) { return (a === -1 || b === -1)? -1 : a+b; }
+function combine(a,b) { return (a === -1 || b === -1)? -1 : a+b; }
 
-function fixedSizePattern(rxNode) {
+export function fixedSizePattern(rxNode) {
  if( !rxNode ) return 0;
 
   if(rxNode === DONE ) return 0;
@@ -297,9 +302,20 @@ function fixedSizePattern(rxNode) {
   return 0; 
 }
 
+export const getArrayMaskListFull = arrayMaskListBuilder(mapper,true); // only required by IREGEX class
+export const getArrayMaskList = arrayMaskListBuilder(mapper,false); // only required by IREGEX class
 
+
+//=================================================fixedSizePattern, 
+
+
+//import {fixedSizePattern, arrayMaskListBuilder, getArrayMaskListFull, getArrayMaskList}
+import {RxParser} from './regexp-parser';
 
 // New Regexp
+/**
+ * 
+ */
 export class IREGEX {
   constructor(str,v) {
       let len = 30;
@@ -334,13 +350,29 @@ export class IREGEX {
         this._len = 30;
       }
   }
-
+  /**
+   * [length description]
+   * @return {[type]} [description]
+   */
   get length() { return this._len; }
   
+  /**
+   * [toString description]
+   * @return {[type]} [description]
+   */
   toString() { return this.str; } /* public */
+
+  /**
+   * [getInputLength description]
+   * @return {[type]} [description]
+   */
   getInputLength() { return this.tracker.length; }
 
-
+  /**
+   * [isDone description]
+   * @param  {[type]}  ix [description]
+   * @return {Boolean}    [description]
+   */
   isDone(ix) {
     if( ix >= this.tracker.length || ix === undefined) {
       return this.state() === DONE;
@@ -348,14 +380,27 @@ export class IREGEX {
     return false;
   }
 
-
+  /**
+   * [getTree description]
+   * @return {[type]} [description]
+   */
   getTree() { return this.base; } /* public */ // Get the parse tree from the regular expression
+
+  /**
+   * [minChars description]
+   * @return {[type]} [description]
+   */
   minChars() { /* public */ // get a ask for the regular expression from the current state of the match
     //if( this._mask ) return this._mask;
     this._mask  = getArrayMask(this.current);
     return this._mask;
   }
 
+  /**
+   * [minCharsList description]
+   * @param  {[type]} flag [description]
+   * @return {[type]}      [description]
+   */
   minCharsList(flag) {
     const fn = flag ? getArrayMaskListFull : getArrayMaskList;
     //if( !flag ) throw new Error("flag should be true");
@@ -363,7 +408,11 @@ export class IREGEX {
   }
 
 
-
+  /**
+   * [match description]
+   * @param  {singleCharacterString} ch the characted to match
+   * @return {boolean}     
+   */
   match(ch) { /* public */
      const fixed = getArrayFixedAt(this.current);
 
@@ -376,6 +425,17 @@ export class IREGEX {
   }
 
 
+  /**
+   * matchStr  will match as much of the input string as possible, 
+   * return the result as rray with the following values
+   * [
+   *   matchFlag : boolean - true if the entire string matched, false otherwise
+   *   count : integer - the lenght of the substring that matched
+   *   matchingStr : string - the substring that matched
+   * ]
+   * @param  {string} str [description]
+   * @return {[totalMatch: boolean, howManyMatched: int32, strThatMatched: string]}     
+   */
   matchStr(str) { /* public */
     const len = str.length;
     let b1=true,b2=0,b3=[];
@@ -389,11 +449,19 @@ export class IREGEX {
     return [b1,b2,str.substring(0,i)];
   }
 
+  /**
+   * [state description]
+   * @return {[type]} [description]
+   */
   state() { /* public */
     this._state = this._state || this._stateCompute();
     return this._state;
   }
 
+  /**
+   * [stateStr description]
+   * @return {[type]} [description]
+   */
   stateStr() {
       const s = this.state();
       if(s === MORE) return "MORE"; // match is not complete but good so far
@@ -401,16 +469,33 @@ export class IREGEX {
       return "DONE";
   }
 
+  /**
+   * [inputStr description]
+   * @return {[type]} [description]
+   */
   inputStr() {
     return this.tracker.map( (a) => a[0]).join('');
   }
 
+
+  /**
+   * [fixed description]
+   * @return {[type]} [description]
+   */
   fixed() { return getArrayFixedAt(this.current); }
 
+  /**
+   * [getCurrentStates description]
+   * @return {[type]} [description]
+   */
   getCurrentStates() {
     return this.current.map(ID);
   }
 
+  /**
+   * [reset description]
+   * @return {[type]} [description]
+   */
   reset() { /* public */
       this.tracker = [];
       this.current.reset();
@@ -421,6 +506,10 @@ export class IREGEX {
       return this;
     }
 
+  /**
+   * [clone description]
+   * @return {[type]} [description]
+   */
   clone() { /* public */
          var t = incrRegEx();
          t.str = this.str;
@@ -437,6 +526,10 @@ export class IREGEX {
          return t;
   }
 
+  /**
+   * [getInputTracker description]
+   * @return {[type]} [description]
+   */
   getInputTracker() { return this.tracker.map(ID); }
 
 // Private methods
