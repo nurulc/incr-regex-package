@@ -1,6 +1,6 @@
 ### Previous Step
 
-![](regex-graph-3.svg)
+<img src="regex-graph-3.svg" width="400">
 
 ### Step 3 match ___'-'___
 
