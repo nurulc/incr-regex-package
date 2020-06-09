@@ -24,15 +24,16 @@
 // Amost the entire original code has been replaces but the original interfaces remain
 //
 "use strict";
-import { assign, copy, extend , arr_find                                       } from "../utils";  
-import { incrRegEx,convertMask ,isMeta, isOptional,isHolder                    } from "../incr-regex-v3";
-import { RxMatcher                    } from "../RxMatcher";  
+import { assign, copy, arr_find }       from "../utils";  
+import { incrRegEx }                    from "../incr-regex-v3";
+import { isHolder, isMeta, isOptional } from "../regex-utils";  
+import { RxMatcher }                    from "../RxMatcher";  
 //import {DONE,MORE,MAYBE,FAILED}         from '../rxtree';
-import {printExpr,printExprN,printExprQ} from "../rxprint";
+//import {printExpr,printExprN,printExprQ} from "../rxprint";
 
-function has(object, key) {
-    return object ? hasOwnProperty.call(object, key) : false;
-}
+// function has(object, key) {
+//     return object ? hasOwnProperty.call(object, key) : false;
+// }
 
 function newSel(s,e) { e = e || s; return {start: Math.min(s,e), end: Math.max(s,e)}; }
 function selPlus(sel, x,y) { return clip(newSel(sel.start+x,sel.end+(y===undefined?x:y))); }

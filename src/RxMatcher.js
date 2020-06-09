@@ -1,5 +1,5 @@
 /** 
- * Copyright (c) 2016, Nurul Choudhury
+ * Copyright (c) 2016..2020, Nurul Choudhury
  * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,15 +18,16 @@
 
 
 "use strict";
-import { assign, copy, extend                                                  } from "./utils";  
-import { incrRegEx,convertMask ,isMeta, isOptional,isHolder                    } from "./incr-regex-v3";  
-import {DONE,MORE,MAYBE,FAILED,rxContentsToMask}                                 from './rxtree';
+//import { assign, copy, extend                                                  } from "./utils";  
+//import { incrRegEx                                                             } from "./incr-regex-v3";  
+import { isHolder, isMeta                             } from "./regex-utils";  
+import { DONE, rxContentsToMask } from './rxtree';
 
 
 // array of [ [type, ch] ...]
-function hasMetaChars(tracker) { 
-  return tracker.find(([_, ch]) => isHolder(ch));
-}
+// function hasMetaChars(tracker) { 
+//   return tracker.find(([, ch]) => isHolder(ch));
+// }
 
 
 function _fixTracker(tracker,i) {
@@ -39,25 +40,25 @@ function _fixTracker(tracker,i) {
 }
 
 export class RxMatcher {
-	constructor(matcher) {
-		this.matcher = matcher;
-		this._lastEditableIndex = undefined;
-		//this._tracker;
-	}
+  constructor(matcher) {
+    this.matcher = matcher;
+    this._lastEditableIndex = undefined;
+    //this._tracker;
+  }
 
   getFirstEditableAtOrAfter(ix) {
-		let i = ix;
-		let tracker = this.getInputTracker();
-		for(;i < tracker.length; i++) 
+    let i = ix;
+    let tracker = this.getInputTracker();
+    for(;i < tracker.length; i++) 
       if(tracker[i][1] === undefined) return i;
       else _fixTracker(tracker,i); // make sure we fixup the value of fixed values
 
-		let m = this.minChars();
-		i = tracker.length;
-		let j = 0;
+    let m = this.minChars();
+    i = tracker.length;
+    let j = 0;
     for(; j<m.length && !isMeta(m.charAt(j)); j++,i++);
-		return i;    
-  	}
+    return i;    
+    }
 
   // we we find a position that has aholder, but should be a fixed characted
   // convert the older to a fixed character
@@ -68,17 +69,17 @@ export class RxMatcher {
     }
   }  
 
-	getFirstEditableAtOrBefore(ix) {
-		let tracker = this.getInputTracker();
-		if( ix >= tracker.length ) ix = tracker.length-1;
-		for(; ix>0;ix--) 
+  getFirstEditableAtOrBefore(ix) {
+    let tracker = this.getInputTracker();
+    if( ix >= tracker.length ) ix = tracker.length-1;
+    for(; ix>0;ix--) 
       if( tracker[ix][1] === undefined ) return ix;
       else _fixTracker(tracker,ix);
-		return 0;  
-	}
+    return 0;  
+  }
 
   getInputLength() {
-  	return this.matcher.getInputLength();
+    return this.matcher.getInputLength();
   }
 
   /*
@@ -118,8 +119,8 @@ export class RxMatcher {
        tracker = this.getInputTracker(); // have to do this since we did some matching
        for(;tracker.length<ix && this.fixed() !== undefined;) 
           if( !this.match(this.fixed()) ) {
-          	ix = this.getInputLength();
-          	break;
+            ix = this.getInputLength();
+            break;
           }
       //this._mask = undefined;
        this._resetCache();
@@ -167,7 +168,7 @@ export class RxMatcher {
     let ret = p.matchStr(s);
     //console.log("ix: ",ix, " str: '", s,"'");
     if( !ret[0] ) {
-    	throw new Error( "Unexpected error (matchStr failed) from "+ p.constructor.name || "IREGEX");
+      throw new Error( "Unexpected error (matchStr failed) from "+ p.constructor.name || "IREGEX");
     }
     return p.minChars();
   }
@@ -179,22 +180,22 @@ export class RxMatcher {
 
 
   emptyAt(ix) {
-  	let tracker = this.getInputTracker();
+    let tracker = this.getInputTracker();
     if(ix < tracker.length) return isHolder(tracker[ix][0]);
     return false;
   }
 
   match(ch) { /* public */
-  	 this._resetCache();
-  	 let ret = this.matcher.match(ch);
+     this._resetCache();
+     let ret = this.matcher.match(ch);
      this.fixTracker();
      return ret;
   }
 
 
   matchStr(str) { /* public */
-  	this._resetCache();
-  	let ret = this.matcher.matchStr(str);
+    this._resetCache();
+    let ret = this.matcher.matchStr(str);
     this.fixTracker();
     return ret;
   }
@@ -206,34 +207,34 @@ export class RxMatcher {
   fixed() { return this.matcher.fixed(); }
 
   reset() { /* public */
-  	  this.matcher.reset();
+      this.matcher.reset();
       this._resetCache();
       return this;
   }
 
   clone() {
-  	return new RxMatcher(this.matcher.clone());
+    return new RxMatcher(this.matcher.clone());
   }
 
 
   getInputTracker() {
     //if( this._tracker === undefined ) 
-    //	this._tracker = this.matcher.tracker;//this.matcher.getInputTracker();  
-  	//return this._tracker; 
+    //  this._tracker = this.matcher.tracker;//this.matcher.getInputTracker();  
+    //return this._tracker; 
     return this.matcher.tracker;
   }
 
 
   getFullTracker() {
-  	let t = this.getInputTracker();
-  	let rest = this.matcher.minChars().map(c => isMeta(c)?[c,undefined]:[c,c]);
-  	//return append(t,rest);
+    let t = this.getInputTracker();
+    let rest = this.matcher.minChars().map(c => isMeta(c)?[c,undefined]:[c,c]);
+    //return append(t,rest);
     return [].concat(t,rest);
   }
 
   _resetCache() {
-  	//this._tracker = undefined;
-  	this._lastEditableIndex = undefined;
+    //this._tracker = undefined;
+    this._lastEditableIndex = undefined;
   }
 
   stateStr() {
