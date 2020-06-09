@@ -1,6 +1,6 @@
 ### Previous State
 
-<img src="regex-graph-3.svg" width="400">
+<img src="regex-graph-1.svg" width="400">
 
 at __pos1__ we find a control node that leads to three possible paths. We add all the paths to a process list:
 
