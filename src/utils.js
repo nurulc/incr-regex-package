@@ -39,39 +39,38 @@ export function assign(object) {
 }
 
 export function copy(obj) { return assign({},obj); }
-function has(obj,key) { return !!obj[key]; }
+//function has(obj,key) { return !!obj[key]; }
 
-export function extend(protoProps, staticProps) {
-    var Parent = this, Child;
-    if (typeof Parent !== 'function') throw new Error('Parent must be a constructor function');
+// export function extend(protoProps, staticProps) {
+//     var Parent = this, Child;
+//     if (typeof Parent !== 'function') throw new Error('Parent must be a constructor function');
 
-    if (has(protoProps, 'constructor')) {
-        Child = protoProps.constructor;
-    } else {
-        Child = function(){ return Parent.apply(this, arguments); };
-    }
+//     if (has(protoProps, 'constructor')) {
+//         Child = protoProps.constructor;
+//     } else {
+//         Child = function(){ return Parent.apply(this, arguments); };
+//     }
 
-    assign(Child, Parent, staticProps);
+//     assign(Child, Parent, staticProps);
 
-    // subclass extends superclass
-    Child.prototype = Object.create(Parent.prototype);
-    if (protoProps) assign(Child.prototype, protoProps);
+//     // subclass extends superclass
+//     Child.prototype = Object.create(Parent.prototype);
+//     if (protoProps) assign(Child.prototype, protoProps);
 
-    Child.prototype.constructor = Child;
-    //Child.__super__ = Parent.prototype;
+//     Child.prototype.constructor = Child;
+//     //Child.__super__ = Parent.prototype;
 
-    return Child;
-}
+//     return Child;
+// }
 
 
 export const contract = (function() {
   const call = Function.prototype.call;
-  const slice = call.bind([].slice);
   const getClassName = call.bind({}.toString);
 
   // A contract that allows anything
 
-  const isUndef = function(x) { return (typeof x == 'undefined'); };
+  const isUndef = function(x) { return (x === undefined); };
   const NVL= function(v,dflt) { return isUndef(v)? dflt: v; };
   const any = function(x) {
       return x;
@@ -153,7 +152,9 @@ export const contract = (function() {
     arr, isArr,
     classOf, isClassOf,
     instanceOf, 
-    isUndef
+    isUndef,
+    STR,
+    any, NVL
   };
 })();
 
@@ -217,7 +218,7 @@ export function array_match(array, subArray, at) {
     let lenS = subArray.length;
     if( at+lenS > len ) return false; // cannot match subArray too long 
 
-    for (let i = at, l=lenS, j=0; j < lenS; i++,j++) {
+    for (let i = at, j=0; j < lenS; i++,j++) {
         // Check if we have nested arrays
         if (subArray[j] instanceof Array && array[i] instanceof Array) {
             // recurse into the nested arrays
@@ -317,14 +318,14 @@ if (typeof Object.assign != 'function') {
   })();
 }
 
-function rxtokensOld() {
-  var t = "\\[(?:\\\\]|[^\\]]])*\\]";
-  var meta = "[.\\]|)]|\\(\\?:|\\(|\\?\\?|\\?|\\*\\?|\\*|\\+\\?|\\+";
-  var escaped = "\\\\(?:"+meta + "|" + "[dDsSbBwW\\[{}\\]])";
-  var group ="\\{[0-9]+(?:,[0-9]*)?\\}";
-  var nonMeta = "[^.+?{}\\]\\[|()]";
-  return [ /*unicode,*/ t, group, escaped, meta, nonMeta ].join("|");
-}
+// function rxtokensOld() {
+//   var t = "\\[(?:\\\\]|[^\\]]])*\\]";
+//   var meta = "[.\\]|)]|\\(\\?:|\\(|\\?\\?|\\?|\\*\\?|\\*|\\+\\?|\\+";
+//   var escaped = "\\\\(?:"+meta + "|" + "[dDsSbBwW\\[{}\\]])";
+//   var group ="\\{[0-9]+(?:,[0-9]*)?\\}";
+//   var nonMeta = "[^.+?{}\\]\\[|()]";
+//   return [ /*unicode,*/ t, group, escaped, meta, nonMeta ].join("|");
+// }
 
 
 /* REGEXP TOKENIZER HELPERS */

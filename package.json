@@ -35,7 +35,9 @@
     "mocha": "*",
     "webpack": "^4.43.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "eslint_d": "^9.0.0"
+  },
   "author": "Nurul Choudhury",
   "license": "ISC",
   "bugs": {

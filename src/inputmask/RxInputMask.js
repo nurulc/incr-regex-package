@@ -31,9 +31,6 @@ import { RxMatcher }                    from "../RxMatcher";
 //import {DONE,MORE,MAYBE,FAILED}         from '../rxtree';
 //import {printExpr,printExprN,printExprQ} from "../rxprint";
 
-// function has(object, key) {
-//     return object ? hasOwnProperty.call(object, key) : false;
-// }
 
 function newSel(s,e) { e = e || s; return {start: Math.min(s,e), end: Math.max(s,e)}; }
 function selPlus(sel, x,y) { return clip(newSel(sel.start+x,sel.end+(y===undefined?x:y))); }
@@ -50,8 +47,6 @@ function zeroRange(sel) { return zero(selRange(sel)); }
 function backward(oldSelV, newSelV) {
   return (oldSelV.start > newSelV. start);
 }
-
-
 
 export class RXInputMask{
     constructor(options) {

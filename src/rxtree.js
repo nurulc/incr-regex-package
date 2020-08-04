@@ -55,7 +55,8 @@ export const FAILED =       OP({type: 'N', val: "FAILED", multi: BOUNDARY, op: '
 
 function __match(regexp) {
   return function(ch) { 
-  	return !!(ch !== DONE && (ch === undefined || ch.match(regexp)))? MATCH_TRUE: MATCH_FALSE };
+    return (ch !== DONE && (ch === undefined || ch.match(regexp)))? MATCH_TRUE: MATCH_FALSE;
+  };
 }
 
 const _stdRegexp = { "\\d": __match(/\d/), 
@@ -435,4 +436,4 @@ export const RXTREE = { MANY, TERM, PERHAPS_MORE, BOUNDARY, matchable,boundary,d
                         RX_OP, RX_UNARY, RX_CONS,RX_OR, RX_ZERO_OR_ONE,RX_ZERO_OR_MORE, RX_ONE_OR_MORE,copyNode, stdRxMeta, 
                         makeCharSet, makeFSM, getArrayFixedAt, rxMatchArr, rxNextState, rxMatch, rxStepArr,
                         rxCanReach, rxGetActualStartState, advancedRxMatcher, HOLDER_ZERO_OR_MORE, HOLDER_ANY, HOLDER_ZERO_OR_ONE
-                    };
+};

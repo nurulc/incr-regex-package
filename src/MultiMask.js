@@ -17,30 +17,30 @@
 
 
 
-class MultiMask {
+export class MultiMask {
 	constructor(m1,m2,m3) {
-	  var list = [m1,m2,m3];
-	  this.multi = list.map((e) => { return { flag: true, element: e}; });
-	  this.len  = 0;
-	  this.raw = '';
+		var list = [m1,m2,m3];
+		this.multi = list.map((e) => { return { flag: true, element: e}; });
+		this.len  = 0;
+		this.raw = '';
 	}
 
 	findTrue() {
-	    var res = this.multi.filter( (e) => e.flag );
-	    return { flag: res.length > 0, rest: res };
+		var res = this.multi.filter( (e) => e.flag );
+		return { flag: res.length > 0, rest: res };
 	}
 
 	findLen() {
-      var length = this.length;
+	  var length = this.length;
 	  var res = this.multi.filter( (e) => e.selection.end == length );
 	  return { len: res.length, rest: res };
 	}
 
 	input(c) {
 	   if(someTrue(this.multi,c)) {
-	       this.length++;
-	       this.raw= this;
-	       return true;
+		   this.length++;
+		   this.raw= this;
+		   return true;
 	   }
 	   return false;
 	}

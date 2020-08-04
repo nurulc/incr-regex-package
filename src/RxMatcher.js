@@ -91,7 +91,7 @@ export class RxMatcher {
       suppose p = /xxx\d.*fred\d{9}yyy|xxx.joy.*zzz/
       input must be: xxx_fred_________yyy
       nothing else will fit.
-      This is a tricky problem, I am not confident i have a provably
+      This is a tricky problem, I am not confident i have a proveably
       correct algorithm for this to handle all edge cases, but the
       back propogation method will handle most cases
   */
@@ -131,8 +131,6 @@ export class RxMatcher {
   get length() { return this.matcher.length; }
 
   toString() { return this.matcher.toString(); } /* public */
-
-
 
   after(ix) { return this.matcher._after(true,ix); }
   valueWithMask() { return this.matcher.valueWithMask(); }
