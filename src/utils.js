@@ -20,23 +20,25 @@
 "use strict";
 
 
-export function assign(object) {
-    if (!object) {
-        return object;
-    }
-    for (var argsIndex = 1, argsLength = arguments.length; argsIndex < argsLength; argsIndex++) {
-        var iterable = arguments[argsIndex];
-        if (typeof iterable === 'function' || (typeof iterable === 'object' && iterable !== null)) {
-            var index = -1, keys = Object.keys(iterable),
-                length = keys ? keys.length : 0, prop;
-            while (++index < length) {
-                prop = keys[index];
-                object[prop] = iterable[prop];
-            }
-        }
-    }
-    return object;
-}
+// export function assign(object) {
+//     if (!object) {
+//         return object;
+//     }
+//     for (var argsIndex = 1, argsLength = arguments.length; argsIndex < argsLength; argsIndex++) {
+//         var iterable = arguments[argsIndex];
+//         if (typeof iterable === 'function' || (typeof iterable === 'object' && iterable !== null)) {
+//             var index = -1, keys = Object.keys(iterable),
+//                 length = keys ? keys.length : 0, prop;
+//             while (++index < length) {
+//                 prop = keys[index];
+//                 object[prop] = iterable[prop];
+//             }
+//         }
+//     }
+//     return object;
+// }
+
+export function assign(...object)  { return Object.assign(...object)}
 
 export function copy(obj) { return assign({},obj); }
 //function has(obj,key) { return !!obj[key]; }
@@ -333,7 +335,9 @@ export const TOKINIZATION_RX = makeRegexp();
 function rxtokens() {
   function ESACPE(s) { return s.split('').map( a => "\\"+a).join('|'); }
   function OR(s) { return s.split('').join('|'); }
-  var charSet = "\\[(?:\\\\u|\\\\\\]|\\\\\\\\|(\\\\)?\\[|[^\\]\\[\\\\])*?\\]";
+  //var charSet = "\\[(?:\\\\u|\\\\\\]|\\\\\\\\|(\\\\)?\\[|[^\\]\\[\\\\])*?\\]";
+
+  var charSet = "(?:\\[\\^\\]|\\[\\^?(?:\\\\.|[^\\]])*?(?:\\\\\\\\]|[^\\\\]]))"; // may not work
   //var meta = "[.\\]|)]|\\(\\?:|\\(|\\?\\?|\\?|\\*\\?|\\*|\\+\\?|\\+";
   var meta1 = ESACPE(".|+*?()^$")
   var meta2 = "\\(\\?:|\\?\\?|\\*\\?|\\+\\?";
@@ -451,13 +455,13 @@ export class StackDedup {
 
   pop() {
     if(this.length <= 0) return this;
-    length--;
+    this.length--;
     return this;
   }
 
   top() {
     if(this.length <= 0) return undefined;
-    return data[this.length-1];
+    return this.data[this.length-1];
   }
 
   addAll(list) {
@@ -489,7 +493,7 @@ class List_n {
 
   addAll(aList) {
     if( !aList ) return this;
-    return n_reverse(a).reduce( (rst, head) => n_cons(head, rst), this);
+    return n_reverse(aList).reduce( (rst, head) => n_cons(head, rst), this);
   }
 
   map(f) { return n_map(f,this); }

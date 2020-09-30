@@ -102,11 +102,11 @@ function convert(str) {
 	if(str == '[\\b]' )               return BS;
 	if(str == '^' || str == '$' )     return {type: 'N', val: str,  multi: BOUNDARY, op: 'BOUNDARY', match: begining};
 	if(str == '\\b' || str == '\\B' ) return {type: 'N', val: str,  multi: BOUNDARY, op: 'BOUNDARY', match: endofstr};
-	if((/^\[.*\]$/).test(str) )       return makeCharSet(str);//{type: 'N', val: str,  multi: MANY,     op: 'CHARSET', match: __match(new RegExp(str))};
+	if( (/^\[([^\]]|\\.)*\]$/).test(str) )       return makeCharSet(str);//{type: 'N', val: str,  multi: MANY,     op: 'CHARSET', match: __match(new RegExp(str))};
 	if(str == '|' )                   return OR;
 	if((/^[?+*]\??$/).test(str)  )    return _metaMap[str.substring(0,1)];
 	if((/^\{[^}]*\}$/ ).test(str))    return {type: 'U', val: str, op: 'MULTIRANGE', fn: parseMulti(str)};
-	if((/^\\[dDsSwW]$/).test(str) )   return stdRxMeta(str); //{type: 'N', val: str, multi: MANY, op: 'SPECIAL-CHARSET',match: __match(_stdRegexp[str])};
+	if((/^\\[bdDsSwW]$/).test(str) )   return stdRxMeta(str); //{type: 'N', val: str, multi: MANY, op: 'SPECIAL-CHARSET',match: __match(_stdRegexp[str])};
 	if((/^\\[trn]$/).test(str) )      return {type: 'N', val: chmap[str.substring(1,2)], multi: TERM, op: 'NON-PRINTING',match: __match("\\"+str.substring(1))};
 	if((/^\\[.?+*{}()$^\\:|\][]$/).test(str) ) return {type: 'N', val: str.substring(1,2), multi: TERM, op: 'SINGLE', match: __matchc(str.substring(1)) };
 	return { type: 'N', val: str, multi: TERM, op: 'SINGLE', match: __matchc(str) };
